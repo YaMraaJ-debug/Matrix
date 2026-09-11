@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --fluent-accent: #0078d4;
+    --fluent-bg-light: #f3f3f3;
+    --fluent-card-light: #ffffff;
+    --fluent-border-light: rgba(0, 0, 0, 0.08);
+  }
+
+  .dark {
+    --fluent-accent: #60cdff;
+    --fluent-bg-dark: #202020;
+    --fluent-card-dark: #2d2d2d;
+    --fluent-border-dark: rgba(255, 255, 255, 0.08);
+  }
+
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  }
+}
+
+/* Custom scrollbar for modern Windows Fluent look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(120, 120, 120, 0.25);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 120, 120, 0.45);
+}
+
+.acrylic-blur {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}

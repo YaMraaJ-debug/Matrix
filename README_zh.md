@@ -1,9 +1,9 @@
 <h4 align="right">
-  <a href="README_zh.md">简体中文</a> | English
+  简体中文 | <a href="README.md">English</a>
 </h4>
 
 > [!TIP]
-> Join the Ghost Downloader community on Discord: [discord.gg/fKfhkPumEM](https://discord.gg/fKfhkPumEM)
+> 欢迎加入 Ghost Downloader Discord 社区: [discord.gg/fKfhkPumEM](https://discord.gg/fKfhkPumEM)
 
 <!-- PROJECT LOGO -->
 <div align="center">
@@ -12,8 +12,9 @@
 
 <a href="https://trendshift.io/repositories/13847" target="_blank"><img src="https://trendshift.io/api/badge/repositories/13847" alt="XiaoYouChR%2FGhost-Downloader-3 | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 
-## The only downloader you need
+## 下载器的集大成者
 
+[![AtomGit Stars][atomgit-stars-shield]][atomgit-stars-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
@@ -22,25 +23,25 @@
 [![QQGroup](https://img.shields.io/badge/QQ_Group-756042420-blue.svg?color=blue&style=for-the-badge)](https://qm.qq.com/q/gPk6FR1Hby)
 [![Discord](https://img.shields.io/discord/1527965717973176391?style=for-the-badge&logo=discord&logoColor=white&label=Discord&color=%235865F2)](https://discord.gg/fKfhkPumEM)
 
-##### [Documentation](https://gd.xychr.com/en/docs/) · [Report Bug](https://github.com/XiaoYouChR/Ghost-Downloader-3/issues/new?template=bug_report.yml) · [Request Feature](https://github.com/XiaoYouChR/Ghost-Downloader-3/issues/new?template=feature_request.yml)
+##### [使用文档](https://gd.xychr.com/zh/docs/) · [Bug 报告](https://github.com/XiaoYouChR/Ghost-Downloader-3/issues/new?template=bug_report.yml) · [功能需求](https://github.com/XiaoYouChR/Ghost-Downloader-3/issues/new?template=feature_request.yml)
 
 </div>
 
 <!-- FEATURES -->
-## Features
+## 功能特性
 
-* **Fast where it matters.** Every downloader is fast on a good connection. Smart chunking without file merging, auto-detects bandwidth headroom. Real-browser TLS fingerprints, invisible to anti-bot checks. Downloads complete, whatever the network.
-* **One app instead of five.** Five tools is a habit, not a necessity. Every protocol — `HTTP`, `Magnet/BT`, `FTP`, `M3U8`, `MPEG-DASH`, `eD2k` — plus purpose-built parsers: `YouTube` and `Bilibili` with clip selection and any quality, `GitHub` and `HuggingFace` with mirror acceleration. Broad where it counts, deep where it matters.
-* **See it. Sniff it. Download it.** A download button floats right on the video, any quality; every medium on the page, listed in the popup. Click it, or download as you normally would — the desktop app takes over either way. No copying links, signed-in state included.
-* **Native on every platform.** It shows in the details. One app, four systems — everywhere, just right.
-* **Always in control.** Change on command, stop on command. `aria2`-compatible RPC for third-party tools; change the URL, headers, or proxy mid-download — the progress you've earned stays.
+* **快在刀刃。** 好网快是本分，烂网快才是本事。智能分块无需合并文件，自动探测带宽余量。真实浏览器 TLS 指纹，风控无从分辨。无论网络条件如何，从容下完。
+* **合而不同。** 集大成，而不失其专。`HTTP`、`磁力/BT`、`FTP`、`M3U8`、`MPEG-DASH`、`eD2k` 全协议通吃；`YouTube` 与 `Bilibili` 框选片段、任意画质与字幕、播放列表与合集分 P，`GitHub` 与 `HuggingFace` 镜像加速：通用够广，专精够深。
+* **一触即发。** 下载按钮就浮在视频画面上，任意画质；页面上的媒体，弹窗里一览无余。点一下，或照常在浏览器下载，桌面端都会接手，链接不用复制，登录状态原样带过去。
+* **始终如一。** 细节见真章。同一个软件，四个系统，处处都是原生应用该有的样子。
+* **游刃有余。** 说变就变，说停就停。`aria2` 兼容 RPC，第三方工具直接推送；下载途中改链接、改请求头、改代理，已下的进度分毫不动。
 
 <!-- ABOUT THE PROJECT -->
-## About The Project
+## 关于本项目
 
-Started as a passion project to help a Bilibili creator manage resources. Now it ships on four platforms, handles virtually every download protocol, and has a growing Feature Packs plugin ecosystem.
+始于兴趣，最初是为了帮一位 B 站 UP 主整合资源。如今已覆盖四大平台、支持几乎所有主流下载协议，功能包插件体系也在逐步开放中。
 
-| Platform | Required Version | Architectures |
+| 平台 | 版本要求 | 架构支持 |
 |:--|:--|:--|
 | <img src="https://api.iconify.design/mdi/microsoft-windows.svg?color=%238B949E" width="16" height="16"> **Windows** | `10+` | `x86_64` / `arm64` |
 | <img src="https://api.iconify.design/mdi/apple.svg?color=%238B949E" width="16" height="16"> **macOS** | `13.0+` | `x86_64` / `arm64` |
@@ -48,53 +49,53 @@ Started as a passion project to help a Bilibili creator manage resources. Now it
 | <img src="https://api.iconify.design/mdi/android.svg?color=%238B949E" width="16" height="16"> **Android** | `11.0+` | `arm64-v8a` |
 
 > [!WARNING]
-> Qt `6.6+` no longer supports CPUs without the `AVX` instruction set.
+> 由于 Qt `6.6+` 已经不再支持 `不支持 AVX 指令集的 CPU`
 
-> [!TIP]
-> **Arch Linux AUR support**: Community-maintained packages `ghost-downloader-bin` and `ghost-downloader-git` are now available (Maintainer: [@zxp19821005](https://github.com/zxp19821005))
+> [!TIP]  
+> **Arch Linux AUR 支持**：现已可通过社区维护的软件包 `ghost-downloader-bin` 和 `ghost-downloader-git` 进行安装（维护者：[@zxp19821005](https://github.com/zxp19821005)）
 
 <!-- SCREEN SHOTS -->
-## Screenshots
+## 截图
 
 ![Demo](https://github.com/user-attachments/assets/6763c9e0-cd5d-450e-80f5-1e22adcff36e)
 
 <!-- ROADMAP -->
-## Roadmap
+## 计划
 
-- [ ] Make the plugin API public (Feature Packs system is operational, API stabilizing)
-- [ ] Enhanced task editing, such as binding multiple Sessions to one task
+- [ ] 面向外部开发者公开插件 API（功能包体系已运作，API 稳定中）
+- [ ] 更强大的任务编辑功能（一个任务绑定多个 Sessions 等）
 
-Visit [Open issues](https://github.com/XiaoYouChR/Ghost-Downloader-3/issues) to see all requested features (and known issues).
+到 [Open issues](https://github.com/XiaoYouChR/Ghost-Downloader-3/issues) 页面查看所有被请求的功能 (以及已知的问题) 。
 
 <!-- SPONSOR -->
-## Sponsor
+## 赞助商
 
-| Logo | Description |
+| 标志 | 描述 |
 |------|---|
-| <a href="https://signpath.org/"><img src="https://signpath.org/assets/favicon-50x50.png" width="50" height="50" alt="SignPath" /></a> | Free code signing provided by [SignPath.io](https://about.signpath.io/), with certificates by [SignPath Foundation](https://signpath.org/) |
-| <a href="https://i0ntempest.com/"><img src="https://pbs.twimg.com/profile_images/1970235828552265728/tCvxOrZY_400x400.jpg" width="50" height="50" alt="i0ntempest" /></a> | Free code signing provided by [i0ntempest.com](https://i0ntempest.com/) |
+| <a href="https://signpath.org/"><img src="https://signpath.org/assets/favicon-50x50.png" width="50" height="50" alt="SignPath" /></a> | 由 [SignPath.io](https://about.signpath.io/) 提供免费代码签名，由 [SignPath Foundation](https://signpath.org/) 提供证书 |
+| <a href="https://i0ntempest.com/"><img src="https://pbs.twimg.com/profile_images/1970235828552265728/tCvxOrZY_400x400.jpg" width="50" height="50" alt="i0ntempest" /></a> | 由 [i0ntempest.com](https://i0ntempest.com/) 提供免费代码签名 |
 
 <!-- CONTRIBUTING -->
-## Contributing
+## 贡献
 
-Contributions make the open source community an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+贡献让开源社区成为了一个非常适合学习、启发和创新的地方。你所做出的任何贡献都是**受人尊敬**的。
 
-If you have a suggestion, fork the repo and create a pull request. You can also simply open an issue with the "Enhancement" tag. Don't forget to give the project a star! Thanks again!
+如果你有好的建议，请分支（Fork）本仓库并且创建一个拉取请求（Pull Request）。你也可以简单地创建一个议题（Issue），并且添加标签「Enhancement」。不要忘记给项目点一个 Star！再次感谢！
 
-1. Fork the Project
-2. Create your Feature Branch (git checkout -b feature/AmazingFeature)
-3. Commit your Changes (git commit -m 'Add some AmazingFeature')
-4. Push to the Branch (git push origin feature/AmazingFeature)
-5. Open a Pull Request
+1. 复刻（Fork）本项目
+2. 创建你的 Feature 分支 (git checkout -b feature/AmazingFeature)
+3. 提交你的变更 (git commit -m 'Add some AmazingFeature')
+4. 推送到该分支 (git push origin feature/AmazingFeature)
+5. 创建一个拉取请求（Pull Request）
 
-Thanks to all contributors who have participated in this project!
+感谢所有为该项目做出贡献的人！
 
 [![Contributors](http://contrib.nn.ci/api?repo=XiaoYouChR/Ghost-Downloader-3)](https://github.com/XiaoYouChR/Ghost-Downloader-3/graphs/contributors)
 
-## Translation Contributors
+## 翻译贡献者
 
 > [!TIP]
-> If you'd like to help translate Ghost Downloader, welcome to join the Crowdin project: [ghost-downloader](https://crowdin.com/project/ghost-downloader)
+> 如果你想为 Ghost Downloader 贡献翻译，欢迎前往 Crowdin 项目页: [ghost-downloader](https://crowdin.com/project/ghost-downloader)
 
 <!-- CROWDIN-CONTRIBUTORS-START -->
 <table>
@@ -134,25 +135,25 @@ Thanks to all contributors who have participated in this project!
 <!-- CROWDIN-CONTRIBUTORS-END -->
 
 <!-- LICENSE -->
-## License
+## 许可证
 
-Distributed under the GPL v3.0 License. Open `LICENSE` for more details.
+根据 GPL v3.0 许可证分发。打开 `LICENSE` 查看更多内容。
 
 Copyright © 2024-2026 XiaoYouChR.
 
 <!-- CONTACT -->
-## Contact
+## 联系
 
 > [!IMPORTANT]
-> Welcome to join the Ghost Downloader user group: [756042420](https://qm.qq.com/q/gPk6FR1Hby)
+> 欢迎加入 Ghost Downloader 用户交流群 [756042420](https://qm.qq.com/q/gPk6FR1Hby)
 
 * [E-mail](mailto:XiaoYouChR@qq.com) - XiaoYouChR@qq.com
 
 <!-- ACKNOWLEDGMENTS -->
-## References
+## 引用
 
 * [aioftp](https://github.com/aio-libs/aioftp) Ftp client/server for asyncio
-* [cat-catch](https://github.com/xifangczy/cat-catch) Browser Resource Sniffing Extension
+* [cat-catch](https://github.com/xifangczy/cat-catch) 猫抓 浏览器资源嗅探扩展
 * [desktop-notifier](https://github.com/samschott/desktop-notifier) Python library for cross-platform desktop notifications
 * [FFmpeg](https://ffmpeg.org/) A complete, cross-platform solution to record, convert and stream audio and video
 * [goed2k](https://github.com/monkeyWie/goed2k) The eD2k download daemon behind Ghost Downloader's eD2k support
@@ -162,7 +163,7 @@ Copyright © 2024-2026 XiaoYouChR.
 * [mpegdash](https://github.com/sangoma/mpegdash) MPEG-DASH MPD parser
 * [N_m3u8DL-RE](https://github.com/nilaoda/N_m3u8DL-RE) Cross-platform DASH/HLS/MSS download tool powering Ghost Downloader's M3U8 support
 * [Nuitka](https://github.com/Nuitka/Nuitka) The Python compiler
-* [PyQt-Fluent-Widgets](https://github.com/zhiyiYo/PyQt-Fluent-Widgets) Powerful, extensible, and elegant Fluent Design-style widget library
+* [PyQt-Fluent-Widgets](https://github.com/zhiyiYo/PyQt-Fluent-Widgets) 强大、可扩展、美观优雅的 Fluent Design 风格组件库
 * [PySide6](https://github.com/PySide/pyside-setup) The official Python module
 * [QuickJS-NG](https://github.com/quickjs-ng/quickjs) A small and embeddable JavaScript engine
 * [uvloop](https://github.com/MagicStack/uvloop) Ultra fast asyncio event loop
@@ -170,10 +171,10 @@ Copyright © 2024-2026 XiaoYouChR.
 * [wreq](https://github.com/0x676e67/wreq-python) An ergonomic Python HTTP client with TLS fingerprint emulation
 * [yt-dlp](https://github.com/yt-dlp/yt-dlp) A feature-rich command-line audio/video downloader
 
-## Acknowledgments
+## 致谢
 
-* [@zhiyiYo](https://github.com/zhiyiYo/) is amazing and provided a lot of help for this project.
-* [@空糖_SuGar](https://github.com/SuGar0218/) created the project banner.
+* [@zhiyiYo](https://github.com/zhiyiYo/) 是大佬！为该项目的开发提供了很多帮助！
+* [@空糖_SuGar](https://github.com/SuGar0218/) 制作了项目的 Banner！
 
 ## Star History
 
@@ -191,6 +192,8 @@ Copyright © 2024-2026 XiaoYouChR.
 [forks-url]: https://github.com/XiaoYouChR/Ghost-Downloader-3/network/members
 [stars-shield]: https://img.shields.io/github/stars/XiaoYouChR/Ghost-Downloader-3.svg?style=for-the-badge
 [stars-url]: https://github.com/XiaoYouChR/Ghost-Downloader-3/stargazers
+[atomgit-stars-shield]: https://img.shields.io/badge/dynamic/xml?style=for-the-badge&label=AtomGit%20Stars&color=red&url=https%3A%2F%2Fgitcode.com%2FXiaoYouChR%2FGhost-Downloader-3%2Fstar%2Fbadge.svg&query=string%28%2F%2F*%5Blocal-name%28%29%3D%22span%22%20and%20contains%28%40class%2C%22star-num%22%29%5D%29
+[atomgit-stars-url]: https://gitcode.com/XiaoYouChR/Ghost-Downloader-3
 [issues-shield]: https://img.shields.io/github/issues/XiaoYouChR/Ghost-Downloader-3.svg?style=for-the-badge
 [issues-url]: https://github.com/XiaoYouChR/Ghost-Downloader-3/issues
 [release-shield]: https://img.shields.io/github/v/release/XiaoYouChR/Ghost-Downloader-3?style=for-the-badge

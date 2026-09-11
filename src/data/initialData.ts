@@ -1,0 +1,667 @@
+import { DownloadTask, FeaturePack, MediaResource, ImageResource, AppSettings, RssFeedSubscription, CdnMirrorNode, CloudDebridAccount } from '../types';
+
+function createInitialChunks(totalBytes: number, downloadedBytes: number, numChunks: number) {
+  const chunkSize = Math.floor(totalBytes / numChunks);
+  const chunks = [];
+  let remainingDownloaded = downloadedBytes;
+
+  for (let i = 0; i < numChunks; i++) {
+    const startByte = i * chunkSize;
+    const endByte = i === numChunks - 1 ? totalBytes : (i + 1) * chunkSize - 1;
+    const thisChunkTotal = endByte - startByte + 1;
+    
+    let thisChunkDownloaded = 0;
+    let status: 'completed' | 'active' | 'idle' = 'idle';
+    let speed = 0;
+
+    if (remainingDownloaded >= thisChunkTotal) {
+      thisChunkDownloaded = thisChunkTotal;
+      status = 'completed';
+      remainingDownloaded -= thisChunkTotal;
+    } else if (remainingDownloaded > 0) {
+      thisChunkDownloaded = remainingDownloaded;
+      status = 'active';
+      speed = Math.floor(Math.random() * 800000) + 400000;
+      remainingDownloaded = 0;
+    } else {
+      status = 'active';
+      speed = Math.floor(Math.random() * 600000) + 200000;
+    }
+
+    chunks.push({
+      id: i,
+      startByte,
+      endByte,
+      downloadedBytes: thisChunkDownloaded,
+      speed,
+      status,
+    });
+  }
+  return chunks;
+}
+
+export const initialTasks: DownloadTask[] = [
+  {
+    id: 'task-1',
+    name: 'ubuntu-24.04-desktop-amd64.iso',
+    url: 'https://releases.ubuntu.com/24.04/ubuntu-24.04-desktop-amd64.iso',
+    protocol: 'http',
+    category: 'software',
+    status: 'downloading',
+    priority: 'high',
+    totalBytes: 5046586368, // ~4.7 GB
+    downloadedBytes: 2422361456, // ~2.25 GB (48%)
+    speed: 19451084, // ~18.5 MB/s
+    uploadSpeed: 0,
+    etaSeconds: 135,
+    connections: 16,
+    chunks: createInitialChunks(5046586368, 2422361456, 16),
+    createdAt: Date.now() - 360000,
+    savePath: 'C:\\Downloads\\Software\\ubuntu-24.04-desktop-amd64.iso',
+    md5Hash: '8b7fca29104bde978cf2340156ef9a82',
+    sha256Hash: 'a9b2c89f5643e21019d38cbf9012354a8b7fca29104bde978cf2340156ef9a82',
+    mimeType: 'application/x-iso9660-image',
+    referer: 'https://releases.ubuntu.com/24.04/',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 GhostDownloader/3.0',
+    headers: {
+      'Accept-Ranges': 'bytes',
+      'Server': 'Apache/2.4.52 (Ubuntu)',
+      'Connection': 'keep-alive',
+    },
+  },
+  {
+    id: 'task-2',
+    name: 'blender-4.3.2-windows-x64.msi',
+    url: 'https://github.com/blender/blender/releases/download/v4.3.2/blender-4.3.2-windows-x64.msi',
+    protocol: 'github',
+    category: 'software',
+    status: 'downloading',
+    totalBytes: 377487360, // ~360 MB
+    downloadedBytes: 313314508, // ~298 MB (83%)
+    speed: 13107200, // ~12.5 MB/s
+    uploadSpeed: 0,
+    etaSeconds: 5,
+    connections: 8,
+    chunks: createInitialChunks(377487360, 313314508, 8),
+    createdAt: Date.now() - 120000,
+    savePath: 'C:\\Downloads\\Software\\blender-4.3.2-windows-x64.msi',
+    md5Hash: '43cb6e11899a19c35b80a13d7890bfa2',
+    sha256Hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    mimeType: 'application/x-msi',
+    mirror: 'GitCode / CNB Accelerator',
+    headers: {
+      'X-Mirror-Source': 'cnb.cool-mirror',
+      'Accept-Ranges': 'bytes',
+    },
+  },
+  {
+    id: 'task-3',
+    name: 'Big_Buck_Bunny_4K_60fps_Surround.mkv',
+    url: 'magnet:?xt=urn:btih:dd8255ecdc7ca55fb0bbf81323d87062db1f6d1c&dn=Big+Buck+Bunny+4K',
+    protocol: 'torrent',
+    category: 'video',
+    status: 'downloading',
+    priority: 'high',
+    totalBytes: 943718400, // ~900 MB
+    downloadedBytes: 396361728, // ~378 MB (42%)
+    speed: 9646899, // ~9.2 MB/s
+    uploadSpeed: 1258291, // ~1.2 MB/s
+    etaSeconds: 56,
+    connections: 42,
+    peers: 42,
+    seeders: 19,
+    chunks: createInitialChunks(943718400, 396361728, 24),
+    createdAt: Date.now() - 240000,
+    savePath: 'C:\\Downloads\\Torrents\\Big_Buck_Bunny_4K_60fps_Surround.mkv',
+    mimeType: 'video/x-matroska',
+    mediaPreviewUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    trackers: [
+      {
+        id: 'trk-1',
+        url: 'udp://tracker.opentrackr.org:1337/announce',
+        status: 'active',
+        seeders: 19,
+        leechers: 23,
+        downloaded: 4892,
+        lastAnnounce: '32s ago',
+      },
+      {
+        id: 'trk-2',
+        url: 'udp://open.demonii.com:1337/announce',
+        status: 'active',
+        seeders: 14,
+        leechers: 18,
+        downloaded: 3201,
+        lastAnnounce: '1m ago',
+      },
+      {
+        id: 'trk-3',
+        url: 'https://tracker.torrent.eu.org:451/announce',
+        status: 'announcing',
+        seeders: 9,
+        leechers: 12,
+        downloaded: 1940,
+        lastAnnounce: 'Just now',
+      },
+      {
+        id: 'trk-4',
+        url: 'wss://tracker.openwebtorrent.com',
+        status: 'active',
+        seeders: 6,
+        leechers: 8,
+        downloaded: 890,
+        lastAnnounce: '45s ago',
+      },
+    ],
+    connectedPeers: [
+      {
+        id: 'peer-1',
+        ip: '198.51.100.42:6881',
+        country: 'US',
+        client: 'qBittorrent/4.6.3',
+        downloadSpeed: 3840000,
+        uploadSpeed: 420000,
+        progressPercent: 94.2,
+        flags: 'u - downloading, I - incoming, E - encrypted',
+      },
+      {
+        id: 'peer-2',
+        ip: '185.220.101.5:51413',
+        country: 'DE',
+        client: 'Transmission/4.0.5',
+        downloadSpeed: 2980000,
+        uploadSpeed: 512000,
+        progressPercent: 100.0,
+        flags: 'u - downloading, S - seeder, E - encrypted',
+      },
+      {
+        id: 'peer-3',
+        ip: '103.24.120.89:6889',
+        country: 'JP',
+        client: 'GhostDownloader/3.0',
+        downloadSpeed: 1840000,
+        uploadSpeed: 180000,
+        progressPercent: 68.5,
+        flags: 'u - downloading, O - outgoing',
+      },
+      {
+        id: 'peer-4',
+        ip: '49.36.88.19:6882',
+        country: 'IN',
+        client: 'qBittorrent/4.5.2',
+        downloadSpeed: 986899,
+        uploadSpeed: 146291,
+        progressPercent: 55.0,
+        flags: 'u - downloading, E - encrypted',
+      },
+    ],
+  },
+  {
+    id: 'task-4',
+    name: 'Tears_of_Steel_1080p_HLS_Master.ts',
+    url: 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8',
+    protocol: 'm3u8',
+    category: 'video',
+    status: 'completed',
+    priority: 'normal',
+    totalBytes: 1288490188, // 1.2 GB
+    downloadedBytes: 1288490188,
+    speed: 0,
+    etaSeconds: 0,
+    connections: 12,
+    chunks: createInitialChunks(1288490188, 1288490188, 16),
+    createdAt: Date.now() - 900000,
+    completedAt: Date.now() - 150000,
+    savePath: 'C:\\Downloads\\Video\\Tears_of_Steel_1080p_HLS_Master.mp4',
+    md5Hash: '9c5f87a02b11e25d3b6f001193ab23ff',
+    sha256Hash: '315f5bdb76d078c43b8ac0064e4a0164612b1fce77c869345bfc94c75894edd3',
+    mimeType: 'video/mp4',
+    quality: '1080p Full HD (60fps)',
+    mediaPreviewUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+  },
+  {
+    id: 'task-5',
+    name: 'Meta-Llama-3-8B-Instruct-Q4_K_M.gguf',
+    url: 'https://huggingface.co/QuantFactory/Meta-Llama-3-8B-Instruct-GGUF/resolve/main/Meta-Llama-3-8B-Instruct.Q4_K_M.gguf',
+    protocol: 'huggingface',
+    category: 'document',
+    status: 'paused',
+    totalBytes: 5284823040, // ~4.92 GB
+    downloadedBytes: 1849688064, // ~1.72 GB (35%)
+    speed: 0,
+    etaSeconds: 0,
+    connections: 32,
+    chunks: createInitialChunks(5284823040, 1849688064, 32),
+    createdAt: Date.now() - 1200000,
+    savePath: 'C:\\Downloads\\AI_Models\\Meta-Llama-3-8B-Instruct-Q4_K_M.gguf',
+    mimeType: 'application/octet-stream',
+    mirror: 'HF-Mirror (hf-mirror.com)',
+  },
+  {
+    id: 'task-6',
+    name: 'Cyberpunk_2077_Night_City_Radio_FLAC.zip',
+    url: 'ftp://archive.telecom.org/music/cyberpunk_2077_radio_flac.zip',
+    protocol: 'ftp',
+    category: 'music',
+    status: 'completed',
+    totalBytes: 503316480, // ~480 MB
+    downloadedBytes: 503316480,
+    speed: 0,
+    etaSeconds: 0,
+    connections: 4,
+    chunks: createInitialChunks(503316480, 503316480, 8),
+    createdAt: Date.now() - 1800000,
+    completedAt: Date.now() - 950000,
+    savePath: 'C:\\Downloads\\Music\\Cyberpunk_2077_Night_City_Radio_FLAC.zip',
+    md5Hash: '7a2e8c56e0df3518bb126f5920a2e584',
+    sha256Hash: '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
+    mimeType: 'application/zip',
+  },
+];
+
+export const initialFeaturePacks: FeaturePack[] = [
+  {
+    id: 'pack-http',
+    name: 'HTTP & Chunk Engine Pack',
+    identifier: 'http_pack',
+    version: '3.2.0',
+    enabled: true,
+    description: 'High-performance HTTP/1.1 & HTTP/2 segmented chunk downloader with real-browser TLS fingerprint emulation.',
+    protocols: ['http', 'https'],
+    features: ['Dynamic Chunk Allocation', 'Auto Headroom Detection', 'TLS Impersonation (wreq)', 'Resume on Broken Stream'],
+  },
+  {
+    id: 'pack-bt',
+    name: 'BitTorrent & Magnet Pack',
+    identifier: 'bittorrent_pack',
+    version: '2.1.1',
+    enabled: true,
+    description: 'Powered by libtorrent v2 engine. Supports DHT, PEX, WebSeeds, fast magnet link resolving, and tracker list auto-update.',
+    protocols: ['magnet', 'torrent'],
+    features: ['Selective File Downloading', 'Smart Peer Choking', 'Live DHT Scraping', 'WebTracker Integration'],
+  },
+  {
+    id: 'pack-m3u8',
+    name: 'M3U8 & HLS Stream Pack',
+    identifier: 'm3u8_pack',
+    version: '3.0.4',
+    enabled: true,
+    description: 'Specialized HLS/M3U8 and MPEG-DASH downloader with concurrent segment fetching and AES-128 crypto support.',
+    protocols: ['m3u8', 'mpd', 'hls'],
+    features: ['Concurrent Segment Queue', 'AES-128 In-Memory Decrypt', 'Automatic Stream Merge', 'Live HLS Sniffer'],
+  },
+  {
+    id: 'pack-bili',
+    name: 'Bilibili Parser Pack',
+    identifier: 'bili_pack',
+    version: '2.4.1',
+    enabled: true,
+    description: 'Native video & audio extractor for Bilibili videos. Supports up to 4K 120fps HDR, Dolby Vision, and Danmaku XML/ASS download.',
+    protocols: ['bilibili', 'b23.tv'],
+    features: ['High-Bitrate Audio Muxer', 'Danmaku Exporter', 'Multi-P Episode Batch Queue', 'Credential Roaming'],
+  },
+  {
+    id: 'pack-yt',
+    name: 'YouTube & yt-dlp Pack',
+    identifier: 'yt_dlp_pack',
+    version: '2025.02.19',
+    enabled: true,
+    description: 'Seamless integration with yt-dlp. Downloads YouTube videos, playlists, chapters, subtitles, and extracted audio tracks.',
+    protocols: ['youtube', 'youtu.be', '1000+ sites'],
+    features: ['Adaptive Format Selection', 'Embedded Subtitles & Thumbnails', 'Audio Extraction', 'Playlist Parser'],
+  },
+  {
+    id: 'pack-github',
+    name: 'GitHub Mirror Accelerator Pack',
+    identifier: 'github_pack',
+    version: '1.8.0',
+    enabled: true,
+    description: 'Automatic mirror redirection for GitHub Releases, raw files, and archive tarballs with low latency nodes.',
+    protocols: ['github.com'],
+    features: ['Smart Mirror Fallback', 'GitCode / CNB Mirror', 'Release Asset Batch Sniffer', 'Rate Limit Bypass'],
+  },
+  {
+    id: 'pack-hf',
+    name: 'Hugging Face Model Pack',
+    identifier: 'huggingface_pack',
+    version: '1.5.0',
+    enabled: true,
+    description: 'High-speed model weights and dataset shards downloader with automatic hf-mirror mirror fallback and integrity verify.',
+    protocols: ['huggingface.co'],
+    features: ['SafeTensors Shard Queue', 'GGUF Multi-Part Chunking', 'Repo Tree Clone', 'SHA256 Auto-Check'],
+  },
+  {
+    id: 'pack-ed2k',
+    name: 'eD2k Daemon Pack',
+    identifier: 'ed2k_pack',
+    version: '1.2.0',
+    enabled: true,
+    description: 'Built-in goed2k client bridge connecting to the eD2k / eMule Kad network for distributed file retrieval.',
+    protocols: ['ed2k'],
+    features: ['Kad Network Node Discovery', 'Credit System Emulation', 'Multi-Source Chunking', 'Corrupt Block Recovery'],
+  },
+  {
+    id: 'pack-ffmpeg',
+    name: 'FFmpeg Transcoder Pack',
+    identifier: 'ffmpeg_pack',
+    version: '7.1.0',
+    enabled: true,
+    description: 'Minimal LGPL self-built FFmpeg core for lossless stream merging, MP4/MKV container packing, and audio extraction.',
+    protocols: ['ffmpeg-mux'],
+    features: ['Lossless Stream Muxing', 'Fast Remuxing Without Re-encode', 'Subtitle Injection', 'Audio Normalization'],
+  },
+  {
+    id: 'pack-ftp',
+    name: 'FTP & FTPS Pack',
+    identifier: 'ftp_pack',
+    version: '1.1.0',
+    enabled: true,
+    description: 'Asynchronous FTP client with segmented transfer, recursive directory download, and TLS FTPS security support.',
+    protocols: ['ftp', 'ftps'],
+    features: ['Multi-Connection FTP', 'Directory Tree Traversal', 'Passive / Active Mode', 'Resume Broken Uploads'],
+  },
+];
+
+export const initialMediaResources: MediaResource[] = [
+  {
+    id: 'res-1',
+    title: 'Elephants Dream Open-Movie (4K Master HLS)',
+    url: 'https://demo.unified-streaming.com/k8s/features/stable/video/elephants-dream/elephants-dream.ism/.m3u8',
+    type: 'm3u8',
+    sizeBytes: 1572864000,
+    duration: '10:54',
+    resolution: '3840x2160 (60fps)',
+    pageUrl: 'https://orange.blender.org/video',
+    detectedAt: Date.now() - 180000,
+  },
+  {
+    id: 'res-2',
+    title: 'Sintel Blender Animated Short (1080p MP4)',
+    url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+    type: 'mp4',
+    sizeBytes: 52428800,
+    duration: '0:52',
+    resolution: '1920x1080',
+    pageUrl: 'https://durian.blender.org/',
+    detectedAt: Date.now() - 360000,
+  },
+  {
+    id: 'res-3',
+    title: 'Cyberpunk Sound Effects Soundscape (AAC Audio)',
+    url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackSeeTheWorld.mp4',
+    type: 'aac',
+    sizeBytes: 18874368,
+    duration: '0:30',
+    pageUrl: 'https://freesound.org/people/sample',
+    detectedAt: Date.now() - 540000,
+  },
+  {
+    id: 'res-4',
+    title: 'For Bigger Blazes 4K Presentation (DASH MPD)',
+    url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    type: 'dash',
+    sizeBytes: 83886080,
+    duration: '0:15',
+    resolution: '3840x2160',
+    pageUrl: 'https://google.com/sample',
+    detectedAt: Date.now() - 720000,
+  },
+];
+
+export const initialImages: ImageResource[] = [
+  {
+    id: 'img-1',
+    url: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=1600',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=400',
+    width: 3840,
+    height: 2160,
+    sizeBytes: 3145728,
+    alt: 'Abstract Fluid Cyber Visual 4K',
+    format: 'WEBP',
+  },
+  {
+    id: 'img-2',
+    url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1600',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400',
+    width: 2560,
+    height: 1440,
+    sizeBytes: 2411724,
+    alt: 'Retro Gaming Mechanical Keyboard',
+    format: 'JPEG',
+  },
+  {
+    id: 'img-3',
+    url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1600',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400',
+    width: 4096,
+    height: 2730,
+    sizeBytes: 4194304,
+    alt: 'Circuit Board Motherboard High-Tech',
+    format: 'PNG',
+  },
+  {
+    id: 'img-4',
+    url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400',
+    width: 3000,
+    height: 2000,
+    sizeBytes: 1887436,
+    alt: 'Minimalist Modern Windows 11 Flow',
+    format: 'WEBP',
+  },
+];
+
+export const defaultSettings: AppSettings = {
+  downloadDirectory: 'C:\\Users\\User\\Downloads\\GhostDownloader',
+  maxConcurrentDownloads: 5,
+  globalDownloadLimitKbps: 0, // 0 is unlimited
+  globalUploadLimitKbps: 0, // 0 is unlimited
+  autoStartOnAdd: true,
+  autoDetectCategory: true,
+  clipboardMonitor: true,
+  playCompletionSound: true,
+  theme: 'light',
+  accentColor: '#0078d4',
+  aria2RpcEnabled: true,
+  aria2RpcHost: '127.0.0.1',
+  aria2RpcPort: 6800,
+  aria2RpcSecret: 'ghost-rpc-token-9982',
+  proxyMode: 'none',
+  proxyHost: '127.0.0.1',
+  proxyPort: 7890,
+  scheduledBandwidth: {
+    enabled: false,
+    dayStartHour: 8,
+    dayEndHour: 23,
+    dayLimitKbps: 2048,
+    nightLimitKbps: 0,
+  },
+  autoUnpackConfig: {
+    enabled: true,
+    destinationType: 'subfolder',
+    passwords: ['1234', 'password', 'ghost'],
+    deleteArchiveAfterExtract: false,
+    notifyOnExtract: true,
+  },
+  postDownloadConfig: {
+    action: 'sound',
+    playSound: true,
+    autoShutdownDelaySec: 30,
+  },
+};
+
+export const initialMirrorNodes: CdnMirrorNode[] = [
+  {
+    id: 'mirror-cloudflare',
+    name: 'Cloudflare Global Edge',
+    location: 'Anycast Distributed (Nearest PoP)',
+    provider: 'Cloudflare',
+    host: 'edge.ghost-cdn.cloudflare.net',
+    pingMs: 14,
+    jitterMs: 1.2,
+    packetLoss: 0,
+    speedMbps: 940,
+    status: 'online',
+  },
+  {
+    id: 'mirror-aws',
+    name: 'Amazon CloudFront Edge',
+    location: 'US East (N. Virginia, us-east-1)',
+    provider: 'AWS',
+    host: 'd19823kzm.cloudfront.net',
+    pingMs: 38,
+    jitterMs: 2.5,
+    packetLoss: 0,
+    speedMbps: 880,
+    status: 'online',
+  },
+  {
+    id: 'mirror-fastly',
+    name: 'Fastly High-Capacity PoP',
+    location: 'Europe Central (Frankfurt, FRA)',
+    provider: 'Fastly',
+    host: 'fastly.ghost-dl.net',
+    pingMs: 62,
+    jitterMs: 3.1,
+    packetLoss: 0,
+    speedMbps: 790,
+    status: 'online',
+  },
+  {
+    id: 'mirror-gcp',
+    name: 'Google Cloud CDN Premium',
+    location: 'Asia East (Tokyo, HND)',
+    provider: 'Google Cloud',
+    host: 'gcp-cdn.ghostnetwork.app',
+    pingMs: 24,
+    jitterMs: 1.8,
+    packetLoss: 0,
+    speedMbps: 910,
+    status: 'online',
+  },
+  {
+    id: 'mirror-akamai',
+    name: 'Akamai Intelligent Platform',
+    location: 'Southeast Asia (Singapore, SIN)',
+    provider: 'Akamai',
+    host: 'a2048.akamai.ghost-mirrors.com',
+    pingMs: 45,
+    jitterMs: 2.9,
+    packetLoss: 0,
+    speedMbps: 750,
+    status: 'online',
+  },
+  {
+    id: 'mirror-azure',
+    name: 'Microsoft Azure CDN Standard',
+    location: 'Central India (Pune / Mumbai)',
+    provider: 'Azure',
+    host: 'azureedge.ghostdownload.io',
+    pingMs: 52,
+    jitterMs: 4.0,
+    packetLoss: 0.1,
+    speedMbps: 680,
+    status: 'online',
+  },
+];
+
+export const initialCloudDebridAccounts: CloudDebridAccount[] = [
+  {
+    id: 'debrid-1',
+    provider: 'real_debrid',
+    name: 'Real-Debrid Premium VIP',
+    apiKey: 'RD_SEC_9281a7b489c9381',
+    status: 'active',
+    quotaUsedGb: 480,
+    quotaTotalGb: 2048,
+    expiresAt: '2026-12-31',
+  },
+  {
+    id: 'debrid-2',
+    provider: 'alldebrid',
+    name: 'AllDebrid Unlimited Tier',
+    apiKey: 'AD_API_ff8849102834b',
+    status: 'active',
+    quotaUsedGb: 290,
+    quotaTotalGb: 1500,
+    expiresAt: '2026-11-15',
+  },
+  {
+    id: 'debrid-3',
+    provider: 'gdrive',
+    name: 'Google Drive Enterprise API',
+    apiKey: 'AIzaSyB_OAuth2_Connected',
+    status: 'active',
+    quotaUsedGb: 820,
+    quotaTotalGb: 5000,
+    expiresAt: '2027-01-01',
+  },
+  {
+    id: 'debrid-4',
+    provider: 'mega',
+    name: 'MEGA Pro III Account',
+    apiKey: 'MEGA_SESS_897123aa4',
+    status: 'active',
+    quotaUsedGb: 1200,
+    quotaTotalGb: 8000,
+    expiresAt: '2026-10-20',
+  },
+];
+
+export const initialRssSubscriptions: RssFeedSubscription[] = [
+  {
+    id: 'rss-1',
+    title: 'Blender Studio Open Assets & Movies',
+    feedUrl: 'https://cloud.blender.org/feed.rss',
+    lastUpdated: Date.now() - 14400000,
+    autoDownload: false,
+    filterRegex: '(4K|1080p|Animation)',
+    items: [
+      {
+        id: 'rss-item-1',
+        title: 'Project Gold - Blender 4.2 Animated Short Film (4K HDR Master)',
+        link: 'https://cloud.blender.org/p/gold/film',
+        enclosureUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        enclosureLength: 1468006400,
+        pubDate: '2026-09-10 14:30',
+        category: 'video',
+      },
+      {
+        id: 'rss-item-2',
+        title: 'Spring - Open Movie Soundtrack (FLAC 96kHz Lossless)',
+        link: 'https://cloud.blender.org/p/spring/ost',
+        enclosureUrl: 'https://download.blender.org/demo/audio/Spring_OST_Lossless.zip',
+        enclosureLength: 384000000,
+        pubDate: '2026-09-08 10:15',
+        category: 'music',
+      },
+      {
+        id: 'rss-item-3',
+        title: 'Blender 4.3.2 LTS Linux 64-bit Official Release Tarball',
+        link: 'https://www.blender.org/download/releases/4-3/',
+        enclosureUrl: 'https://download.blender.org/release/Blender4.3/blender-4.3.0-linux-x64.tar.xz',
+        enclosureLength: 325058560,
+        pubDate: '2026-09-05 18:00',
+        category: 'software',
+      },
+    ],
+  },
+  {
+    id: 'rss-2',
+    title: 'Linux Kernel & Distribution Releases',
+    feedUrl: 'https://kernel.org/feeds/kdist.xml',
+    lastUpdated: Date.now() - 43200000,
+    autoDownload: false,
+    items: [
+      {
+        id: 'rss-item-4',
+        title: 'Linux 6.12 Stable Kernel Source Archive',
+        link: 'https://kernel.org',
+        enclosureUrl: 'https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.12.tar.xz',
+        enclosureLength: 145220000,
+        pubDate: '2026-09-09 20:00',
+        category: 'archive',
+      },
+    ],
+  },
+];
