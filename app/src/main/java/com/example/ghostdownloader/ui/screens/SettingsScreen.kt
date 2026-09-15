@@ -1,5 +1,9 @@
 package com.example.ghostdownloader.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,17 +18,24 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BatteryChargingFull
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CleaningServices
+import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.NetworkCheck
+import androidx.compose.material.icons.filled.Nightlight
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.PictureInPicture
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -35,6 +46,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,6 +57,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -77,6 +90,93 @@ fun SettingsScreen(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
+        // Section: Matrix Themes & Neon Engine
+        item {
+            SettingSectionHeader(title = "Matrix Visual Themes", icon = Icons.Default.Palette)
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("Select Cyber Aesthetic", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                    Text(
+                        "Switch between Matrix Neon, Synthwave, OLED Pure Black, and Clean Light styles.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    val themePresets = listOf(
+                        Triple("matrix_neon", "🟢 Matrix Neon", "Green Glow"),
+                        Triple("synthwave", "🟣 Synthwave", "Cyber Violet"),
+                        Triple("oled", "🖤 OLED Black", "Pure Black"),
+                        Triple("cyber_blue", "🔵 Cyber Blue", "Deep Tech"),
+                        Triple("clean_light", "⚪ Clean Light", "Minimalist")
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        themePresets.take(3).forEach { (id, label, _) ->
+                            val isSelected = settings.appTheme == id
+                            Surface(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .border(
+                                        width = if (isSelected) 2.dp else 1.dp,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                                    .clickable { onUpdateSettings(settings.copy(appTheme = id)) },
+                                color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surface
+                            ) {
+                                Box(modifier = Modifier.padding(vertical = 10.dp, horizontal = 2.dp), contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = label,
+                                        fontSize = 10.sp,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        themePresets.drop(3).forEach { (id, label, _) ->
+                            val isSelected = settings.appTheme == id
+                            Surface(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .border(
+                                        width = if (isSelected) 2.dp else 1.dp,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                                    .clickable { onUpdateSettings(settings.copy(appTheme = id)) },
+                                color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surface
+                            ) {
+                                Box(modifier = Modifier.padding(vertical = 10.dp, horizontal = 2.dp), contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = label,
+                                        fontSize = 10.sp,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // Section: Storage & Directory
         item {
             SettingSectionHeader(title = "Storage & Directory", icon = Icons.Default.Folder)
@@ -246,6 +346,108 @@ fun SettingsScreen(
                             onCheckedChange = { onUpdateSettings(settings.copy(playCompletionSound = it)) }
                         )
                     }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Auto-Bypass Captchas & Timers", fontWeight = FontWeight.Medium)
+                            Text("Automated headless resolution for Cloudflare & countdown wait-screens", style = MaterialTheme.typography.bodySmall, color = CyberTeal)
+                        }
+                        Switch(
+                            checked = settings.autoCaptchaBypassEnabled,
+                            onCheckedChange = { onUpdateSettings(settings.copy(autoCaptchaBypassEnabled = it)) }
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Auto-Mirror & Dead Link Failover", fontWeight = FontWeight.Medium)
+                            Text("Seamlessly recover dead or expired URLs from web mirrors without restarting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        Switch(
+                            checked = settings.autoMirrorFailoverEnabled,
+                            onCheckedChange = { onUpdateSettings(settings.copy(autoMirrorFailoverEnabled = it)) }
+                        )
+                    }
+                }
+            }
+        }
+
+        // Section: Turbo Acceleration & Hardware Protection
+        item {
+            SettingSectionHeader(title = "Turbo Acceleration & Hardware Shield", icon = Icons.Default.Bolt)
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Dual-Channel Turbo Bond (Wi-Fi + 4G/5G)", fontWeight = FontWeight.Medium)
+                            Text("Combines Wi-Fi and Cellular data simultaneously for 2x download bandwidth", style = MaterialTheme.typography.bodySmall, color = CyberGreen)
+                        }
+                        Switch(
+                            checked = settings.dualChannelBondingEnabled,
+                            onCheckedChange = { onUpdateSettings(settings.copy(dualChannelBondingEnabled = it)) }
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Battery & Thermal Health Shield", fontWeight = FontWeight.Medium)
+                            Text("Smart pause when device temperature exceeds 42°C or battery < 15%", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        Switch(
+                            checked = settings.thermalBatteryShieldEnabled,
+                            onCheckedChange = { onUpdateSettings(settings.copy(thermalBatteryShieldEnabled = it)) }
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Auto-Deep Sleep on Complete", fontWeight = FontWeight.Medium)
+                            Text("Release wake-locks and enter ultra-low power sleep when all downloads finish", style = MaterialTheme.typography.bodySmall, color = CyberTeal)
+                        }
+                        Switch(
+                            checked = settings.autoShutdownSleepOnComplete,
+                            onCheckedChange = { onUpdateSettings(settings.copy(autoShutdownSleepOnComplete = it)) }
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Floating Speed Bubble (PiP Controller)", fontWeight = FontWeight.Medium)
+                            Text("Displays real-time speed overlay widget while using other apps", style = MaterialTheme.typography.bodySmall, color = CyberTeal)
+                        }
+                        Switch(
+                            checked = settings.floatingBubbleEnabled,
+                            onCheckedChange = { onUpdateSettings(settings.copy(floatingBubbleEnabled = it)) }
+                        )
+                    }
                 }
             }
         }
@@ -286,6 +488,86 @@ fun SettingsScreen(
                             singleLine = true
                         )
                     }
+
+                    // Webhook & Remote Bot Trigger
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Remote Webhook & Bot Sync", fontWeight = FontWeight.Medium)
+                            Text("Trigger remote downloads via HTTP POST / Telegram Bot webhook", style = MaterialTheme.typography.bodySmall, color = CyberTeal)
+                        }
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(CyberTeal.copy(alpha = 0.2f))
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(":6800/webhook", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = CyberTeal, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        }
+
+        // Section: Smart Scheduled Night Downloader (Off-Peak)
+        item {
+            SettingSectionHeader(title = "Smart Scheduled Night Downloader", icon = Icons.Default.Nightlight)
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Scheduled Off-Peak Night Mode", fontWeight = FontWeight.Medium)
+                            Text("Automatically queues and speeds up downloads during off-peak data hours (e.g. unlimited night data)", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        Switch(
+                            checked = settings.scheduledNightMode,
+                            onCheckedChange = { onUpdateSettings(settings.copy(scheduledNightMode = it)) }
+                        )
+                    }
+
+                    if (settings.scheduledNightMode) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            OutlinedTextField(
+                                value = settings.nightStartHour.toString(),
+                                onValueChange = {
+                                    val h = it.toIntOrNull()?.coerceIn(0, 23) ?: 2
+                                    onUpdateSettings(settings.copy(nightStartHour = h))
+                                },
+                                label = { Text("Start Hour (0-23)") },
+                                modifier = Modifier.weight(1f),
+                                singleLine = true
+                            )
+                            OutlinedTextField(
+                                value = settings.nightEndHour.toString(),
+                                onValueChange = {
+                                    val h = it.toIntOrNull()?.coerceIn(0, 23) ?: 7
+                                    onUpdateSettings(settings.copy(nightEndHour = h))
+                                },
+                                label = { Text("End Hour (0-23)") },
+                                modifier = Modifier.weight(1f),
+                                singleLine = true
+                            )
+                        }
+                        Text(
+                            "Tasks will auto-resume at ${settings.nightStartHour}:00 and auto-pause at ${settings.nightEndHour}:00 with maximum speed.",
+                            fontSize = 11.sp,
+                            color = CyberGreen
+                        )
+                    }
                 }
             }
         }
@@ -322,6 +604,64 @@ fun SettingsScreen(
                         Icon(Icons.Default.Security, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Configure Proxy (Tor/SOCKS5) & UA Spoofing", fontSize = 13.sp)
+                    }
+
+                    // Decoy Vault PIN
+                    OutlinedTextField(
+                        value = settings.decoyVaultPin,
+                        onValueChange = { onUpdateSettings(settings.copy(decoyVaultPin = it)) },
+                        label = { Text("Emergency Decoy Vault PIN") },
+                        supportingText = { Text("Entering this PIN opens an innocent decoy sandbox with dummy files") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+
+                    // EXIF / Metadata Stripper
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Auto-Strip EXIF & Device Metadata", fontWeight = FontWeight.Medium)
+                            Text("Wipes GPS, camera serials, and timestamps from downloaded images & videos", style = MaterialTheme.typography.bodySmall, color = CyberTeal)
+                        }
+                        Switch(
+                            checked = settings.autoStripMetadata,
+                            onCheckedChange = { onUpdateSettings(settings.copy(autoStripMetadata = it)) }
+                        )
+                    }
+
+                    // Storage Deduplication
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("SHA-256 Storage Deduplication", fontWeight = FontWeight.Medium)
+                            Text("Detects identical file hashes before downloading chunks to save internal storage", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        Switch(
+                            checked = settings.autoDeduplication,
+                            onCheckedChange = { onUpdateSettings(settings.copy(autoDeduplication = it)) }
+                        )
+                    }
+
+                    // AI Subtitle Downloader
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("AI Subtitle Auto-Downloader", fontWeight = FontWeight.Medium)
+                            Text("Automatically scrapes & pairs multi-language .srt subtitles for videos", style = MaterialTheme.typography.bodySmall, color = CyberGreen)
+                        }
+                        Switch(
+                            checked = settings.autoSubtitleDownload,
+                            onCheckedChange = { onUpdateSettings(settings.copy(autoSubtitleDownload = it)) }
+                        )
                     }
                 }
             }

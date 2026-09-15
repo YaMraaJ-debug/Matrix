@@ -24,7 +24,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cast
+import androidx.compose.material.icons.filled.CastConnected
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FiberManualRecord
 import androidx.compose.material.icons.filled.Forward10
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.GraphicEq
@@ -33,10 +36,15 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PictureInPicture
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Radio
 import androidx.compose.material.icons.filled.Replay10
 import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Subtitles
+import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.VolumeMute
 import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
@@ -52,6 +60,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -92,6 +101,25 @@ fun MediaPlayerModal(
     var volume by remember { mutableFloatStateOf(0.85f) }
     var isMuted by remember { mutableStateOf(false) }
     var isPiPMode by remember { mutableStateOf(false) }
+    var isRecordingStream by remember { mutableStateOf(false) }
+    var recordedSeconds by remember { mutableIntStateOf(0) }
+    var isExtractingAudio by remember { mutableStateOf(false) }
+    var audioExtractedSuccess by remember { mutableStateOf(false) }
+
+    // Cast, Equalizer, Subtitle & Super Boost States
+    var showCastSelector by remember { mutableStateOf(false) }
+    var connectedCastDevice by remember { mutableStateOf<String?>(null) }
+    var superVolumeBoost by remember { mutableFloatStateOf(1.0f) }
+    var selectedEqPreset by remember { mutableStateOf("Vocal AI") }
+    var showSubtitles by remember { mutableStateOf(true) }
+
+    // Live Stream recording timer
+    LaunchedEffect(isRecordingStream) {
+        while (isRecordingStream) {
+            delay(1000)
+            recordedSeconds++
+        }
+    }
 
     // Playback progress ticker
     LaunchedEffect(isPlaying, playbackSpeed) {
@@ -164,7 +192,31 @@ fun MediaPlayerModal(
                         }
                     }
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        if (isVideo) {
+                            IconButton(
+                                onClick = { showSubtitles = !showSubtitles },
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Subtitles,
+                                    contentDescription = "Subtitles",
+                                    tint = if (showSubtitles) CyberTeal else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
+                        IconButton(
+                            onClick = { showCastSelector = !showCastSelector },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (connectedCastDevice != null) Icons.Default.CastConnected else Icons.Default.Cast,
+                                contentDescription = "Cast stream",
+                                tint = if (connectedCastDevice != null) CyberGreen else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
                         IconButton(
                             onClick = { isPiPMode = !isPiPMode },
                             modifier = Modifier.size(32.dp)
@@ -189,6 +241,63 @@ fun MediaPlayerModal(
                     }
                 }
 
+                if (showCastSelector) {
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    Icon(Icons.Default.Tv, contentDescription = null, tint = CyberGreen, modifier = Modifier.size(16.dp))
+                                    Text("Chromecast & DLNA / UPnP Stream", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                }
+                                if (connectedCastDevice != null) {
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(CyberGreen.copy(alpha = 0.2f))
+                                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                                    ) {
+                                        Text("CASTING ACTIVE", fontSize = 9.sp, color = CyberGreen, fontWeight = FontWeight.Bold)
+                                    }
+                                }
+                            }
+                            listOf(
+                                "Sony Bravia 4K TV (Chromecast Ultra)",
+                                "LG OLED C3 webOS (DLNA / UPnP Renderer)",
+                                "NVIDIA Shield TV Pro (Android TV Cast)"
+                            ).forEach { dev ->
+                                val isSelected = connectedCastDevice == dev
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(if (isSelected) CyberGreen.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surface)
+                                        .clickable {
+                                            connectedCastDevice = if (isSelected) null else dev
+                                        }
+                                        .padding(horizontal = 10.dp, vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(dev, fontSize = 11.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal)
+                                    Text(
+                                        if (isSelected) "Connected (1080p)" else "Tap to Cast",
+                                        fontSize = 10.sp,
+                                        color = if (isSelected) CyberGreen else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
                 // Viewport: Video surface or Audio Waveform
                 Box(
                     modifier = Modifier
@@ -208,6 +317,24 @@ fun MediaPlayerModal(
                     } else {
                         // Audio animated frequency visualizer
                         AudioVisualizerBars(isPlaying = isPlaying)
+                    }
+
+                    if (isVideo && showSubtitles) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(bottom = 12.dp, start = 16.dp, end = 16.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color.Black.copy(alpha = 0.75f))
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "[AI Subs • EN] » Ultra-low latency chunk streaming active.",
+                                fontSize = 11.sp,
+                                color = Color.White,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
 
                     // Floating Live / Codec HUD tag
@@ -364,7 +491,7 @@ fun MediaPlayerModal(
                             }
                         }
 
-                        // Volume Row
+                        // Volume Row with 200% Super Booster
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
@@ -387,14 +514,137 @@ fun MediaPlayerModal(
                                     volume = it
                                     if (isMuted) isMuted = false
                                 },
-                                valueRange = 0f..1f,
-                                modifier = Modifier.weight(1f)
+                                valueRange = 0f..2.0f,
+                                modifier = Modifier.weight(1f),
+                                colors = SliderDefaults.colors(
+                                    thumbColor = if (volume > 1.0f) com.example.ghostdownloader.ui.theme.CyberRed else CyberTeal,
+                                    activeTrackColor = if (volume > 1.0f) com.example.ghostdownloader.ui.theme.CyberRed else CyberTeal
+                                )
                             )
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text(
+                                    text = if (isMuted) "0%" else "${(volume * 100).toInt()}%",
+                                    fontSize = 11.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (volume > 1.0f) com.example.ghostdownloader.ui.theme.CyberRed else CyberTeal
+                                )
+                                if (volume > 1.0f) {
+                                    Text("BOOSTED", fontSize = 8.sp, color = com.example.ghostdownloader.ui.theme.CyberRed, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+
+                        // Equalizer Presets Row
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Icon(Icons.Default.GraphicEq, contentDescription = null, tint = CyberGreen, modifier = Modifier.size(14.dp))
+                                Text("DSP Equalizer & Voice Clarity", fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+                            }
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            listOf("Default", "Bass Boost +6dB", "Vocal AI", "Night Mode").forEach { eq ->
+                                FilterChip(
+                                    selected = selectedEqPreset == eq,
+                                    onClick = { selectedEqPreset = eq },
+                                    label = { Text(eq, fontSize = 9.sp) },
+                                    modifier = Modifier.weight(1f),
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = CyberGreen.copy(alpha = 0.25f),
+                                        selectedLabelColor = CyberGreen
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Pro Features: Audio Extractor & M3U8 Live Stream Recorder Card
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            text = "Stream Tools & Audio Extractor",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = CyberTeal
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // Audio Extractor Button
+                            Button(
+                                onClick = {
+                                    isExtractingAudio = true
+                                    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                                        isExtractingAudio = false
+                                        audioExtractedSuccess = true
+                                    }, 1800)
+                                },
+                                enabled = !isExtractingAudio,
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(containerColor = CyberPurple.copy(alpha = 0.8f))
+                            ) {
+                                Icon(Icons.Default.MusicNote, contentDescription = null, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    if (isExtractingAudio) "Extracting..." else if (audioExtractedSuccess) "Extracted (MP3)" else "Extract MP3",
+                                    fontSize = 11.sp
+                                )
+                            }
+
+                            // M3U8 / Live Stream Recorder Button
+                            Button(
+                                onClick = {
+                                    if (isRecordingStream) {
+                                        isRecordingStream = false
+                                    } else {
+                                        recordedSeconds = 0
+                                        isRecordingStream = true
+                                    }
+                                },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (isRecordingStream) com.example.ghostdownloader.ui.theme.CyberRed else CyberGreen.copy(alpha = 0.85f)
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = if (isRecordingStream) Icons.Default.FiberManualRecord else Icons.Default.Radio,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    if (isRecordingStream) "REC (${recordedSeconds}s)" else "Record M3U8",
+                                    fontSize = 11.sp
+                                )
+                            }
+                        }
+
+                        if (audioExtractedSuccess) {
                             Text(
-                                text = if (isMuted) "0%" else "${(volume * 100).toInt()}%",
-                                fontSize = 11.sp,
-                                fontFamily = FontFamily.Monospace,
-                                color = CyberTeal
+                                "✓ Lossless MP3 (320kbps) saved to /Music/GhostDownloader/",
+                                fontSize = 10.sp,
+                                color = CyberGreen,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        } else if (isRecordingStream) {
+                            Text(
+                                "🔴 Recording live HLS/M3U8 chunks in real-time -> ${title}_stream_rec.ts",
+                                fontSize = 10.sp,
+                                color = com.example.ghostdownloader.ui.theme.CyberRed,
+                                fontFamily = FontFamily.Monospace
                             )
                         }
                     }

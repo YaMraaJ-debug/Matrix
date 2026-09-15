@@ -53,6 +53,9 @@ import com.example.ghostdownloader.utils.PlatformArchitectureManager
 fun FeaturePacksScreen(
     packs: List<FeaturePack>,
     onTogglePack: (String) -> Unit,
+    onOpenAiParser: () -> Unit = {},
+    onOpenBonding: () -> Unit = {},
+    onOpenCloudDebrid: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val deviceProfile = remember { PlatformArchitectureManager.getDeviceProfile() }
@@ -95,7 +98,7 @@ fun FeaturePacksScreen(
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = CyberBlue.copy(alpha = 0.12f)),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
                 shape = RoundedCornerShape(10.dp)
             ) {
                 Row(
@@ -105,7 +108,7 @@ fun FeaturePacksScreen(
                     Icon(
                         imageVector = Icons.Default.Memory,
                         contentDescription = null,
-                        tint = CyberBlueLight,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(10.dp))
@@ -114,7 +117,7 @@ fun FeaturePacksScreen(
                             text = "Native Engine: ${deviceProfile.primaryAbi} (Android 9.0+)",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = CyberBlueLight
+                            color = MaterialTheme.colorScheme.primary
                         )
                         Text(
                             text = "Dual-ABI architecture optimized for arm64-v8a & armv7 with cross-platform protocol packs.",
@@ -223,6 +226,31 @@ fun FeaturePacksScreen(
                                     text = feat,
                                     fontSize = 10.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+
+                    if (pack.id in listOf("ai_parser_pack", "bonding_pack", "cloud_debrid_pack")) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                            FilledTonalButton(
+                                onClick = {
+                                    when (pack.id) {
+                                        "ai_parser_pack" -> onOpenAiParser()
+                                        "bonding_pack" -> onOpenBonding()
+                                        "cloud_debrid_pack" -> onOpenCloudDebrid()
+                                    }
+                                },
+                                modifier = Modifier.height(32.dp)
+                            ) {
+                                Text(
+                                    text = when (pack.id) {
+                                        "ai_parser_pack" -> "Open AI Parser"
+                                        "bonding_pack" -> "Configure Bonding"
+                                        else -> "Open Cloud / Debrid"
+                                    },
+                                    fontSize = 11.sp
                                 )
                             }
                         }

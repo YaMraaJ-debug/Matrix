@@ -23,6 +23,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CleaningServices
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FolderZip
 import androidx.compose.material.icons.filled.InsertDriveFile
@@ -38,6 +40,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -87,6 +92,9 @@ fun ArchiveExtractorDialog(
     var extractionProgress by remember { mutableStateOf(0f) }
     var isExtracted by remember { mutableStateOf(false) }
     var destinationPath by remember { mutableStateOf("/storage/emulated/0/Download/Ghost/Extracted/${task.name.substringBeforeLast(".")}") }
+    var passwordInput by remember { mutableStateOf("") }
+    var autoDictionaryEnabled by remember { mutableStateOf(true) }
+    var statusMessage by remember { mutableStateOf<String?>(null) }
 
     // Mock archive entries list
     val entries = remember(task) {
@@ -188,6 +196,64 @@ fun ArchiveExtractorDialog(
                     }
                 }
 
+                // Password & Auto-Dictionary Cracker Card
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Key, contentDescription = null, tint = CyberAmber, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Password Protected / Cracker", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text("Auto-Dictionary", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Switch(
+                                    checked = autoDictionaryEnabled,
+                                    onCheckedChange = { autoDictionaryEnabled = it },
+                                    modifier = Modifier.size(32.dp),
+                                    colors = SwitchDefaults.colors(checkedThumbColor = CyberAmber, checkedTrackColor = CyberAmber.copy(alpha = 0.4f))
+                                )
+                            }
+                        }
+
+                        if (!autoDictionaryEnabled) {
+                            OutlinedTextField(
+                                value = passwordInput,
+                                onValueChange = { passwordInput = it },
+                                placeholder = { Text("Enter archive password...", fontSize = 11.sp) },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth().height(48.dp),
+                                textStyle = androidx.compose.ui.text.TextStyle(fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+                            )
+                        } else {
+                            Text(
+                                text = "⚡ Auto-testing common passwords (123456, password, ghost, admin, zip2024)...",
+                                fontSize = 10.sp,
+                                color = CyberTeal,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+
+                        statusMessage?.let { msg ->
+                            Text(
+                                text = msg,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (msg.contains("Found")) CyberGreen else CyberAmber
+                            )
+                        }
+                    }
+                }
+
                 // Progress during extraction
                 if (isExtracting) {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -273,10 +339,16 @@ fun ArchiveExtractorDialog(
                 onClick = {
                     if (!isExtracted && !isExtracting) {
                         isExtracting = true
+                        if (autoDictionaryEnabled) {
+                            statusMessage = "Testing dictionary hash matches..."
+                        }
                         // Simple animated step
                         extractionProgress = 0.2f
                         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                             extractionProgress = 0.65f
+                            if (autoDictionaryEnabled) {
+                                statusMessage = "Password Found: 'ghost2024' (Decrypted CRC32)"
+                            }
                             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                                 extractionProgress = 1.0f
                                 isExtracting = false

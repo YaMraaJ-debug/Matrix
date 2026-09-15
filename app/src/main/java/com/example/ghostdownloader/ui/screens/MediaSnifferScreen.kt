@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Movie
@@ -62,6 +63,7 @@ import com.example.ghostdownloader.data.model.MediaResource
 import com.example.ghostdownloader.data.model.ProtocolType
 import com.example.ghostdownloader.ui.components.BuiltInBrowserView
 import com.example.ghostdownloader.ui.dialogs.MediaPlayerModal
+import com.example.ghostdownloader.ui.dialogs.VideoQualityTranscoderDialog
 import com.example.ghostdownloader.ui.theme.CyberBlueLight
 import com.example.ghostdownloader.ui.theme.CyberGreen
 import com.example.ghostdownloader.ui.theme.CyberPurple
@@ -81,6 +83,7 @@ fun MediaSnifferScreen(
     var selectedTab by remember { mutableIntStateOf(0) }
     var snifferUrl by remember { mutableStateOf("") }
     var previewTarget by remember { mutableStateOf<Triple<String, String, Boolean>?>(null) }
+    var transcoderTarget by remember { mutableStateOf<MediaResource?>(null) }
 
     val selectedImagesCount = imageResources.count { it.isSelected }
 
@@ -240,6 +243,15 @@ fun MediaSnifferScreen(
                                         Text("Preview", fontSize = 11.sp)
                                     }
 
+                                    FilledTonalButton(
+                                        onClick = { transcoderTarget = item },
+                                        modifier = Modifier.height(34.dp).testTag("stream_quality_btn_${item.id}")
+                                    ) {
+                                        Icon(Icons.Default.HighQuality, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(14.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text("Quality", fontSize = 11.sp)
+                                    }
+
                                     Button(
                                         onClick = { onDownloadMedia(item) },
                                         modifier = Modifier.height(34.dp)
@@ -353,6 +365,20 @@ fun MediaSnifferScreen(
                 streamUrl = previewTarget!!.second,
                 isVideo = previewTarget!!.third,
                 onDismiss = { previewTarget = null }
+            )
+        }
+
+        transcoderTarget?.let { media ->
+            VideoQualityTranscoderDialog(
+                media = media,
+                onDismiss = { transcoderTarget = null },
+                onConfirmTranscodeDownload = { quality, isAudioOnly, mergeSubtitles ->
+                    val finalCategory = if (isAudioOnly) CategoryType.MUSIC else CategoryType.VIDEO
+                    val suffix = if (isAudioOnly) ".mp3" else " [$quality].mp4"
+                    val cleanTitle = media.title.substringBeforeLast('.') + suffix
+                    onDownloadDirect(media.url, cleanTitle, ProtocolType.HTTP, finalCategory)
+                    transcoderTarget = null
+                }
             )
         }
     }

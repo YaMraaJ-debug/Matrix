@@ -22,6 +22,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Dialpad
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.Backspace
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
@@ -80,6 +82,7 @@ import com.example.ghostdownloader.utils.Formatters
 fun GhostVaultDialog(
     vaultedTasks: List<DownloadTask>,
     currentPin: String,
+    decoyPin: String = "0000",
     onDismiss: () -> Unit,
     onUnlockTask: (String) -> Unit,
     onDeleteTask: (String) -> Unit,
@@ -88,10 +91,17 @@ fun GhostVaultDialog(
 ) {
     val context = LocalContext.current
     var isUnlocked by remember { mutableStateOf(false) }
+    var isDecoyMode by remember { mutableStateOf(false) }
     var enteredPin by remember { mutableStateOf("") }
     var showChangePinModal by remember { mutableStateOf(false) }
     var newPinInput by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var isCalculatorMode by remember { mutableStateOf(false) }
+    var calcDisplay by remember { mutableStateOf("0") }
+    var calcPrevOperand by remember { mutableStateOf<Double?>(null) }
+    var calcPendingOp by remember { mutableStateOf<String?>(null) }
+    var calcResetNext by remember { mutableStateOf(false) }
+    var calcSecretBuffer by remember { mutableStateOf("") }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -125,38 +135,194 @@ fun GhostVaultDialog(
                             modifier = Modifier
                                 .size(36.dp)
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(CyberPurple.copy(alpha = 0.2f)),
+                                .background(if (isCalculatorMode && !isUnlocked) CyberTeal.copy(alpha = 0.2f) else CyberPurple.copy(alpha = 0.2f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = if (isUnlocked) Icons.Default.LockOpen else Icons.Default.Lock,
+                                imageVector = if (isUnlocked) Icons.Default.LockOpen else if (isCalculatorMode) Icons.Default.Dialpad else Icons.Default.Lock,
                                 contentDescription = null,
-                                tint = CyberPurple,
+                                tint = if (isCalculatorMode && !isUnlocked) CyberTeal else CyberPurple,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
                         Column {
                             Text(
-                                text = "Ghost Secret Vault",
+                                text = if (isCalculatorMode && !isUnlocked) "Scientific Calculator" else "Ghost Secret Vault",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp
                             )
                             Text(
-                                text = if (isUnlocked) "Encrypted Sandbox UNLOCKED" else "AES-256 Protected Storage",
+                                text = if (isUnlocked) "Encrypted Sandbox UNLOCKED" else if (isCalculatorMode) "Standard DEC/HEX Mode" else "AES-256 Protected Storage",
                                 fontSize = 11.sp,
-                                color = if (isUnlocked) CyberGreen else CyberPurple,
+                                color = if (isUnlocked) CyberGreen else if (isCalculatorMode) CyberTeal else CyberPurple,
                                 fontFamily = FontFamily.Monospace,
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
                     }
 
-                    IconButton(onClick = onDismiss) {
-                        Icon(Icons.Default.Close, contentDescription = "Close")
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (!isUnlocked) {
+                            IconButton(onClick = { isCalculatorMode = !isCalculatorMode }) {
+                                Icon(
+                                    imageVector = if (isCalculatorMode) Icons.Default.Lock else Icons.Default.Dialpad,
+                                    contentDescription = "Toggle Calculator Disguise",
+                                    tint = if (isCalculatorMode) CyberTeal else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        IconButton(onClick = onDismiss) {
+                            Icon(Icons.Default.Close, contentDescription = "Close")
+                        }
                     }
                 }
 
-                if (!isUnlocked) {
+                if (!isUnlocked && isCalculatorMode) {
+                    // Fully Functional Disguised Calculator Mode
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 4.dp),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        // LCD Display Card
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(80.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFF0F172A))
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 16.dp),
+                                contentAlignment = Alignment.CenterEnd
+                            ) {
+                                Text(
+                                    text = calcDisplay,
+                                    color = CyberGreen,
+                                    fontSize = 32.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+
+                        // Calculator Keypad
+                        val calcKeys = listOf(
+                            listOf("C", "±", "%", "÷"),
+                            listOf("7", "8", "9", "×"),
+                            listOf("4", "5", "6", "-"),
+                            listOf("1", "2", "3", "+"),
+                            listOf("0", ".", "=")
+                        )
+
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        ) {
+                            calcKeys.forEach { row ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    row.forEach { k ->
+                                        val isOp = k in listOf("÷", "×", "-", "+", "=")
+                                        val isClear = k in listOf("C", "±", "%")
+                                        val flexWeight = if (k == "0") 2f else 1f
+
+                                        Surface(
+                                            modifier = Modifier
+                                                .weight(flexWeight)
+                                                .height(52.dp)
+                                                .clip(RoundedCornerShape(10.dp))
+                                                .clickable {
+                                                    calcSecretBuffer += k
+                                                    when (k) {
+                                                        "C" -> {
+                                                            calcDisplay = "0"
+                                                            calcPrevOperand = null
+                                                            calcPendingOp = null
+                                                            calcSecretBuffer = ""
+                                                        }
+                                                        "±" -> {
+                                                            val num = calcDisplay.toDoubleOrNull() ?: 0.0
+                                                            calcDisplay = (-num).toString().removeSuffix(".0")
+                                                        }
+                                                        "%" -> {
+                                                            val num = calcDisplay.toDoubleOrNull() ?: 0.0
+                                                            calcDisplay = (num / 100.0).toString()
+                                                        }
+                                                        "÷", "×", "-", "+" -> {
+                                                            calcPrevOperand = calcDisplay.toDoubleOrNull()
+                                                            calcPendingOp = k
+                                                            calcResetNext = true
+                                                        }
+                                                        "=" -> {
+                                                            // Check Secret Bypass Code (7777 or current vault PIN)
+                                                            if (calcSecretBuffer.contains("7777") || (currentPin.isNotEmpty() && calcSecretBuffer.contains(currentPin))) {
+                                                                Toast.makeText(context, "🔓 Disguise Bypassed! Vault Unlocked", Toast.LENGTH_SHORT).show()
+                                                                isDecoyMode = false
+                                                                isUnlocked = true
+                                                            } else if (decoyPin.isNotEmpty() && calcSecretBuffer.contains(decoyPin)) {
+                                                                Toast.makeText(context, "Decoy Sandbox Loaded", Toast.LENGTH_SHORT).show()
+                                                                isDecoyMode = true
+                                                                isUnlocked = true
+                                                            } else {
+                                                                // Real Calculator Arithmetic
+                                                                val second = calcDisplay.toDoubleOrNull() ?: 0.0
+                                                                val first = calcPrevOperand
+                                                                if (first != null && calcPendingOp != null) {
+                                                                    val res = when (calcPendingOp) {
+                                                                        "÷" -> if (second != 0.0) first / second else 0.0
+                                                                        "×" -> first * second
+                                                                        "-" -> first - second
+                                                                        "+" -> first + second
+                                                                        else -> second
+                                                                    }
+                                                                    calcDisplay = res.toString().removeSuffix(".0")
+                                                                    calcPrevOperand = null
+                                                                    calcPendingOp = null
+                                                                    calcResetNext = true
+                                                                }
+                                                            }
+                                                            calcSecretBuffer = ""
+                                                        }
+                                                        else -> {
+                                                            // Digits and dot
+                                                            if (calcResetNext || calcDisplay == "0") {
+                                                                calcDisplay = k
+                                                                calcResetNext = false
+                                                            } else {
+                                                                calcDisplay += k
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                            color = when {
+                                                isOp -> CyberPurple
+                                                isClear -> MaterialTheme.colorScheme.surfaceVariant
+                                                else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                            }
+                                        ) {
+                                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                                Text(
+                                                    text = k,
+                                                    fontSize = 18.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontFamily = FontFamily.Monospace,
+                                                    color = if (isOp) Color.White else MaterialTheme.colorScheme.onSurface
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else if (!isUnlocked) {
                     // PIN Entry Keypad
                     Column(
                         modifier = Modifier
@@ -244,10 +410,15 @@ fun GhostVaultDialog(
                                                                 enteredPin += key
                                                                 errorMessage = null
                                                                 if (enteredPin.length == 4) {
-                                                                    if (enteredPin == currentPin || currentPin.isEmpty()) {
+                                                                    if (enteredPin == decoyPin) {
+                                                                        isDecoyMode = true
+                                                                        isUnlocked = true
+                                                                        Toast.makeText(context, "Decoy Vault Sandbox Loaded", Toast.LENGTH_SHORT).show()
+                                                                    } else if (enteredPin == currentPin || currentPin.isEmpty()) {
+                                                                        isDecoyMode = false
                                                                         isUnlocked = true
                                                                     } else {
-                                                                        errorMessage = "Incorrect PIN. Default is 1234."
+                                                                        errorMessage = "Incorrect PIN. Default: 1234 (Decoy: 0000)"
                                                                         enteredPin = ""
                                                                     }
                                                                 }
@@ -276,29 +447,89 @@ fun GhostVaultDialog(
                     }
                 } else {
                     // Unlocked Vault View
+                    val decoyTasks = remember {
+                        listOf(
+                            DownloadTask(
+                                id = "decoy-1",
+                                name = "College_Physics_Formula_Sheet.pdf",
+                                url = "https://university.edu/physics.pdf",
+                                protocol = com.example.ghostdownloader.data.model.ProtocolType.HTTP,
+                                category = com.example.ghostdownloader.data.model.CategoryType.DOCUMENT,
+                                status = com.example.ghostdownloader.data.model.TaskStatus.COMPLETED,
+                                totalBytes = 2_450_000L,
+                                downloadedBytes = 2_450_000L,
+                                savePath = "/storage/emulated/0/Documents/College_Physics_Formula_Sheet.pdf"
+                            ),
+                            DownloadTask(
+                                id = "decoy-2",
+                                name = "Mountain_Minimalist_4K_Wallpaper.jpg",
+                                url = "https://wallpapers.org/nature.jpg",
+                                protocol = com.example.ghostdownloader.data.model.ProtocolType.HTTP,
+                                category = com.example.ghostdownloader.data.model.CategoryType.DOCUMENT,
+                                status = com.example.ghostdownloader.data.model.TaskStatus.COMPLETED,
+                                totalBytes = 4_120_000L,
+                                downloadedBytes = 4_120_000L,
+                                savePath = "/storage/emulated/0/Pictures/Mountain_Minimalist_4K_Wallpaper.jpg"
+                            ),
+                            DownloadTask(
+                                id = "decoy-3",
+                                name = "Productivity_Audiobook_Ch1.mp3",
+                                url = "https://audiobooks.org/ch1.mp3",
+                                protocol = com.example.ghostdownloader.data.model.ProtocolType.HTTP,
+                                category = com.example.ghostdownloader.data.model.CategoryType.MUSIC,
+                                status = com.example.ghostdownloader.data.model.TaskStatus.COMPLETED,
+                                totalBytes = 18_400_000L,
+                                downloadedBytes = 18_400_000L,
+                                savePath = "/storage/emulated/0/Music/Productivity_Audiobook_Ch1.mp3"
+                            )
+                        )
+                    }
+                    val activeVaultTasks = if (isDecoyMode) decoyTasks else vaultedTasks
+
                     Column(modifier = Modifier.fillMaxSize()) {
+                        if (isDecoyMode) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(CyberTeal.copy(alpha = 0.15f))
+                                    .padding(horizontal = 10.dp, vertical = 6.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Icon(Icons.Default.Shield, contentDescription = null, tint = CyberTeal, modifier = Modifier.size(16.dp))
+                                    Text("Decoy Vault Active • Safe Profile (0000)", fontSize = 11.sp, color = CyberTeal, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Vaulted Items (${vaultedTasks.size})",
+                                text = if (isDecoyMode) "Safe Items (${activeVaultTasks.size})" else "Encrypted Vault (${activeVaultTasks.size})",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                OutlinedButton(
-                                    onClick = { showChangePinModal = true },
-                                    modifier = Modifier.height(32.dp),
-                                    contentPadding = PaddingValues(horizontal = 8.dp)
-                                ) {
-                                    Icon(Icons.Default.Key, contentDescription = null, modifier = Modifier.size(14.dp))
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text("Change PIN", fontSize = 11.sp)
+                                if (!isDecoyMode) {
+                                    OutlinedButton(
+                                        onClick = { showChangePinModal = true },
+                                        modifier = Modifier.height(32.dp),
+                                        contentPadding = PaddingValues(horizontal = 8.dp)
+                                    ) {
+                                        Icon(Icons.Default.Key, contentDescription = null, modifier = Modifier.size(14.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text("Change PIN", fontSize = 11.sp)
+                                    }
                                 }
                                 FilledTonalButton(
-                                    onClick = { isUnlocked = false; enteredPin = "" },
+                                    onClick = { isUnlocked = false; isDecoyMode = false; enteredPin = "" },
                                     modifier = Modifier.height(32.dp),
                                     contentPadding = PaddingValues(horizontal = 8.dp)
                                 ) {
@@ -306,12 +537,30 @@ fun GhostVaultDialog(
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text("Lock", fontSize = 11.sp)
                                 }
+
+                                Button(
+                                    onClick = {
+                                        isUnlocked = false
+                                        isDecoyMode = false
+                                        enteredPin = ""
+                                        calcSecretBuffer = ""
+                                        Toast.makeText(context, "⚡ Panic Wipe: In-memory decrypt keys purged.", Toast.LENGTH_LONG).show()
+                                        onDismiss()
+                                    },
+                                    modifier = Modifier.height(32.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = CyberRed),
+                                    contentPadding = PaddingValues(horizontal = 8.dp)
+                                ) {
+                                    Icon(Icons.Default.Warning, contentDescription = null, modifier = Modifier.size(14.dp), tint = Color.White)
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("PANIC WIPE", fontSize = 11.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                                }
                             }
                         }
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        if (vaultedTasks.isEmpty()) {
+                        if (activeVaultTasks.isEmpty()) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -343,7 +592,7 @@ fun GhostVaultDialog(
                                 modifier = Modifier.weight(1f),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                items(vaultedTasks, key = { it.id }) { task ->
+                                items(activeVaultTasks, key = { it.id }) { task ->
                                     Card(
                                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                                         shape = RoundedCornerShape(10.dp),

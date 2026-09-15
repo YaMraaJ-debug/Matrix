@@ -21,8 +21,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.CloudDownload
+import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.ElectricBolt
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.PlaylistAdd
@@ -83,6 +85,10 @@ fun DownloadsScreen(
     onToggleVault: (String, Boolean) -> Unit = { _, _ -> },
     onOpenSiteExtractor: () -> Unit = {},
     onOpenStorageCleaner: () -> Unit = {},
+    onOpenAiParser: () -> Unit = {},
+    onOpenBonding: () -> Unit = {},
+    onOpenCloudDebrid: () -> Unit = {},
+    onScanSecurity: (DownloadTask) -> Unit = {},
     speedThrottlePreset: String = "Turbo / Uncapped",
     globalLimitKbps: Int = 0,
     modifier: Modifier = Modifier
@@ -141,6 +147,33 @@ fun DownloadsScreen(
                         Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("Add URL")
+                    }
+
+                    FilledTonalButton(
+                        onClick = onOpenAiParser,
+                        modifier = Modifier.testTag("ai_video_parser_quick_btn")
+                    ) {
+                        Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("AI Video Parser")
+                    }
+
+                    FilledTonalButton(
+                        onClick = onOpenBonding,
+                        modifier = Modifier.testTag("dual_bonding_quick_btn")
+                    ) {
+                        Icon(Icons.Default.ElectricBolt, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Dual Bonding (Wi-Fi + 5G)")
+                    }
+
+                    FilledTonalButton(
+                        onClick = onOpenCloudDebrid,
+                        modifier = Modifier.testTag("cloud_debrid_quick_btn")
+                    ) {
+                        Icon(Icons.Default.CloudQueue, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Cloud & Debrid")
                     }
 
                     FilledTonalButton(
@@ -315,7 +348,8 @@ fun DownloadsScreen(
                         onDelete = { onDeleteTask(task.id) },
                         onOpenDetails = { onSelectTask(task) },
                         onPlayMedia = { onPlayMedia(task) },
-                        onToggleVault = { onToggleVault(task.id, !task.isVaulted) }
+                        onToggleVault = { onToggleVault(task.id, !task.isVaulted) },
+                        onScanSecurity = { onScanSecurity(task) }
                     )
                 }
             }

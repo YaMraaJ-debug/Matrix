@@ -1,6 +1,6 @@
 {
-  "name": "Ghost Downloader 3",
-  "description": "Multi-protocol download manager and media sniffer for HTTP, BitTorrent, M3U8, and online video services.",
+  "name": "Matrix-dlp",
+  "description": "Next-generation multi-protocol high-speed download engine, media analyzer, and stream sniffer.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

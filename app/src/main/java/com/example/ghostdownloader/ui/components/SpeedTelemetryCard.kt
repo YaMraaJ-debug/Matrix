@@ -3,6 +3,7 @@ package com.example.ghostdownloader.ui.components
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -98,6 +99,9 @@ fun SpeedTelemetryCard(
             .padding(16.dp)
     ) {
         Column {
+            val primaryColor = MaterialTheme.colorScheme.primary
+            val secondaryColor = MaterialTheme.colorScheme.secondary
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -109,13 +113,13 @@ fun SpeedTelemetryCard(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(CyberBlue.copy(alpha = 0.2f)),
+                            .background(primaryColor.copy(alpha = 0.2f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowDownward,
                             contentDescription = "Download speed",
-                            tint = CyberBlueLight,
+                            tint = primaryColor,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -130,7 +134,7 @@ fun SpeedTelemetryCard(
                             text = Formatters.formatSpeed(totalDownloadSpeed),
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = CyberBlueLight
+                            color = primaryColor
                         )
                     }
                 }
@@ -141,7 +145,7 @@ fun SpeedTelemetryCard(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
                             .background(MaterialTheme.colorScheme.surface)
-                            .border(1.dp, if (globalLimitKbps > 0) CyberGreen else CyberBlueLight.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+                            .border(1.dp, if (globalLimitKbps > 0) primaryColor else primaryColor.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
                             .clickable(onClick = onOpenSpeedLimiter)
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
@@ -149,7 +153,7 @@ fun SpeedTelemetryCard(
                             Icon(
                                 imageVector = Icons.Default.Speed,
                                 contentDescription = "Speed Throttle",
-                                tint = if (globalLimitKbps > 0) CyberGreen else CyberBlueLight,
+                                tint = primaryColor,
                                 modifier = Modifier.size(14.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
@@ -157,7 +161,7 @@ fun SpeedTelemetryCard(
                                 text = if (globalLimitKbps > 0) "${globalLimitKbps}K" else "Turbo",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (globalLimitKbps > 0) CyberGreen else CyberBlueLight
+                                color = primaryColor
                             )
                         }
                     }
@@ -169,13 +173,13 @@ fun SpeedTelemetryCard(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(CyberPurple.copy(alpha = 0.2f)),
+                            .background(secondaryColor.copy(alpha = 0.2f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowUpward,
                             contentDescription = "Upload speed",
-                            tint = CyberPurple,
+                            tint = secondaryColor,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -190,7 +194,7 @@ fun SpeedTelemetryCard(
                             text = Formatters.formatSpeed(totalUploadSpeed),
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = CyberPurple
+                            color = secondaryColor
                         )
                     }
                 }
@@ -205,7 +209,7 @@ fun SpeedTelemetryCard(
                     .height(42.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
-                    .border(0.5.dp, CyberBlue.copy(alpha = 0.25f), RoundedCornerShape(8.dp))
+                    .border(0.5.dp, primaryColor.copy(alpha = 0.35f), RoundedCornerShape(8.dp))
                     .padding(horizontal = 8.dp, vertical = 4.dp)
             ) {
                 Canvas(modifier = Modifier.fillMaxWidth().height(34.dp)) {
@@ -236,7 +240,7 @@ fun SpeedTelemetryCard(
                         drawPath(
                             path = fillPath,
                             brush = Brush.verticalGradient(
-                                colors = listOf(CyberBlue.copy(alpha = 0.35f), Color.Transparent),
+                                colors = listOf(primaryColor.copy(alpha = 0.35f), Color.Transparent),
                                 startY = 0f,
                                 endY = h
                             )
@@ -245,13 +249,13 @@ fun SpeedTelemetryCard(
                         // Draw stroke line
                         drawPath(
                             path = path,
-                            color = CyberBlueLight,
+                            color = primaryColor,
                             style = Stroke(width = 2.5f, cap = StrokeCap.Round)
                         )
                     } else {
                         // Resting state line
                         drawLine(
-                            color = CyberBlue.copy(alpha = 0.3f),
+                            color = primaryColor.copy(alpha = 0.3f),
                             start = Offset(0f, h - 4f),
                             end = Offset(w, h - 4f),
                             strokeWidth = 2f
@@ -298,7 +302,7 @@ fun SpeedTelemetryCard(
                     .fillMaxWidth()
                     .height(4.dp)
                     .clip(RoundedCornerShape(2.dp)),
-                color = if (storageProfile.usedPercent > 85) MaterialTheme.colorScheme.error else CyberBlueLight,
+                color = if (storageProfile.usedPercent > 85) MaterialTheme.colorScheme.error else primaryColor,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant
             )
 

@@ -233,6 +233,30 @@ fun SiteDeepExtractorDialog(
                     }
                 )
 
+                // Smart shields indicator badge
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(CyberGreen.copy(alpha = 0.15f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text("🛡️ CLOUDFLARE BYPASS ON", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = CyberGreen)
+                    }
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(CyberTeal.copy(alpha = 0.15f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text("⚡ TIMER SKIPPER READY", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = CyberTeal)
+                    }
+                }
+
                 // Quick Analyze Button
                 Button(
                     onClick = { runDeepExtract(inputUrl) },

@@ -105,7 +105,12 @@ data class DownloadTask(
     val connectedPeers: List<TorrentPeer> = emptyList(),
     val isVaulted: Boolean = false,
     val speedLimitKbps: Int = 0,
-    val scheduledAt: Long? = null
+    val scheduledAt: Long? = null,
+    val smartTags: List<String> = emptyList(),
+    val mirrorUrls: List<String> = emptyList(),
+    val activeMirror: String? = null,
+    val hasSubtitles: Boolean = false,
+    val isMeshShared: Boolean = false
 ) {
     val progress: Float
         get() = if (totalBytes > 0) (downloadedBytes.toFloat() / totalBytes.toFloat()).coerceIn(0f, 1f) else 0f
@@ -169,7 +174,8 @@ data class RssFeedSubscription(
 )
 
 data class AppSettings(
-    val downloadDirectory: String = "/storage/emulated/0/Download/Ghost",
+    val downloadDirectory: String = "/storage/emulated/0/Download/Matrix-dlp",
+    val appTheme: String = "matrix_neon", // "matrix_neon", "synthwave", "oled", "cyber_blue", "clean_light"
     val maxConcurrentDownloads: Int = 3,
     val globalDownloadLimitKbps: Int = 0,
     val globalUploadLimitKbps: Int = 0,
@@ -191,7 +197,25 @@ data class AppSettings(
     val wifiOnly: Boolean = false,
     val stopOnLowBattery: Boolean = false,
     val vaultPin: String = "1234",
+    val decoyVaultPin: String = "0000",
     val vaultEnabled: Boolean = true,
     val notificationsEnabled: Boolean = true,
-    val speedThrottlePreset: String = "unlimited" // "eco", "gaming", "turbo", "unlimited"
+    val speedThrottlePreset: String = "unlimited", // "eco", "gaming", "turbo", "unlimited"
+    val dualChannelBondingEnabled: Boolean = true, // Wi-Fi + Mobile Data simultaneously
+    val thermalBatteryShieldEnabled: Boolean = true, // Smart pause on overheating / low battery
+    val floatingBubbleEnabled: Boolean = true, // PiP floating speed controller
+    val autoCaptchaBypassEnabled: Boolean = true, // Cloudflare turnstile & timer skipper
+    val autoMirrorFailoverEnabled: Boolean = true, // Dead link auto-revival from mirrors
+    val autoSubtitleDownload: Boolean = true, // Auto download .srt in Hindi & English
+    val autoDeduplication: Boolean = true, // Duplicate hash detection
+    val autoStripMetadata: Boolean = true, // EXIF / personal data wipe
+    val autoShutdownSleepOnComplete: Boolean = false, // Power sleep & notification mute when finished
+    val batteryTempThreshold: Float = 42.0f,
+    val batteryLevelThreshold: Int = 15,
+    val dailyDataBudgetLimitGb: Float = 0f, // 0 = unlimited, > 0 = cellular daily cap (e.g. 1.5f)
+    val chargingOnlyMode: Boolean = false, // Only download when plugged in & battery > 80%
+    val ramCachingZeroFlashWear: Boolean = true, // Sequential RAM buffer before storage flush
+    val calculatorVaultDisguise: Boolean = false, // Disguise vault as working calculator
+    val webDashboardEnabled: Boolean = true, // Remote PC Web UI on port 9090
+    val webDashboardPort: Int = 9090
 )

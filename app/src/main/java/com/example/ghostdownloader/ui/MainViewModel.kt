@@ -240,4 +240,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun updateSettings(newSettings: AppSettings) {
         repository.updateSettings(newSettings)
     }
+
+    fun updateVaultPin(newPin: String) {
+        repository.updateSettings(settings.value.copy(vaultPin = newPin))
+    }
+
+    fun updateDecoyPin(newDecoyPin: String) {
+        repository.updateSettings(settings.value.copy(decoyVaultPin = newDecoyPin))
+    }
 }

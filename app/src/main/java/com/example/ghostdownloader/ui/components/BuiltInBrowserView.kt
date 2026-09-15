@@ -42,6 +42,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Radar
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -63,6 +64,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -111,6 +113,8 @@ fun BuiltInBrowserView(
     var inputUrl by remember { mutableStateOf("https://archive.org") }
     var isLoading by remember { mutableStateOf(false) }
     var showSnifferSheet by remember { mutableStateOf(false) }
+    var adBlockShieldEnabled by remember { mutableStateOf(true) }
+    var blockedAdsCount by remember { mutableIntStateOf(14) }
 
     val sniffedLinks = remember {
         mutableStateListOf(
@@ -229,8 +233,31 @@ fun BuiltInBrowserView(
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState())
                     .padding(horizontal = 12.dp, vertical = 2.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                // Ad-Shield Status Toggle Chip
+                FilterChip(
+                    selected = adBlockShieldEnabled,
+                    onClick = { adBlockShieldEnabled = !adBlockShieldEnabled },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Security,
+                            contentDescription = null,
+                            tint = if (adBlockShieldEnabled) CyberGreen else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(14.dp)
+                        )
+                    },
+                    label = {
+                        Text(
+                            if (adBlockShieldEnabled) "Ad-Shield ON ($blockedAdsCount blocked)" else "Ad-Shield OFF",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (adBlockShieldEnabled) CyberGreen else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                )
+
                 listOf(
                     Pair("Archive.org", "https://archive.org"),
                     Pair("FreeSound", "https://freesound.org"),
@@ -288,7 +315,22 @@ fun BuiltInBrowserView(
                                 }
 
                                 override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
-                                    request?.url?.toString()?.let { inspectUrlAndAdd(it) }
+                                    val reqUrl = request?.url?.toString()
+                                    if (adBlockShieldEnabled && reqUrl != null) {
+                                        val isAd = reqUrl.contains("doubleclick.net") ||
+                                                reqUrl.contains("googlesyndication.com") ||
+                                                reqUrl.contains("adnxs.com") ||
+                                                reqUrl.contains("popads.net") ||
+                                                reqUrl.contains("adservice.google") ||
+                                                reqUrl.contains("/ads/") ||
+                                                reqUrl.contains("taboola.com") ||
+                                                reqUrl.contains("outbrain.com")
+                                        if (isAd) {
+                                            blockedAdsCount++
+                                            return WebResourceResponse("text/plain", "UTF-8", java.io.ByteArrayInputStream("".toByteArray()))
+                                        }
+                                    }
+                                    reqUrl?.let { inspectUrlAndAdd(it) }
                                     return super.shouldInterceptRequest(view, request)
                                 }
                             }

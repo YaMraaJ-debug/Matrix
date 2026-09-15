@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
@@ -72,6 +73,7 @@ fun TaskCard(
     onOpenDetails: () -> Unit,
     onPlayMedia: (() -> Unit)? = null,
     onToggleVault: (() -> Unit)? = null,
+    onScanSecurity: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -143,6 +145,20 @@ fun TaskCard(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(16.dp)
                     )
+
+                    if (task.status == TaskStatus.DOWNLOADING) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(3.dp))
+                                .background(CyberGreen.copy(alpha = 0.18f))
+                                .padding(horizontal = 4.dp, vertical = 1.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Bolt, contentDescription = null, tint = CyberGreen, modifier = Modifier.size(10.dp))
+                                Text("DUAL-BOND", fontSize = 8.sp, fontWeight = FontWeight.Bold, color = CyberGreen)
+                            }
+                        }
+                    }
 
                     // Priority indicator if not normal
                     if (task.priority == TaskPriority.HIGH) {
@@ -228,6 +244,22 @@ fun TaskCard(
                     }
 
                     if (task.status == TaskStatus.COMPLETED) {
+                        if (onScanSecurity != null) {
+                            IconButton(
+                                onClick = onScanSecurity,
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .testTag("task_security_${task.id}")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Shield,
+                                    contentDescription = "Security audit & malware scan",
+                                    tint = CyberGreen,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
+
                         IconButton(
                             onClick = {
                                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
@@ -297,6 +329,60 @@ fun TaskCard(
                 color = MaterialTheme.colorScheme.onSurface
             )
 
+            if (task.smartTags.isNotEmpty() || task.hasSubtitles || task.isMeshShared || task.activeMirror != null) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    task.smartTags.take(3).forEach { tag ->
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(CyberBlue.copy(alpha = 0.12f))
+                                .padding(horizontal = 5.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = tag,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = CyberBlueLight
+                            )
+                        }
+                    }
+                    if (task.hasSubtitles) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(CyberTeal.copy(alpha = 0.16f))
+                                .padding(horizontal = 5.dp, vertical = 2.dp)
+                        ) {
+                            Text("SUB (HI/EN)", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = CyberTeal)
+                        }
+                    }
+                    if (task.isMeshShared) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(CyberPurple.copy(alpha = 0.16f))
+                                .padding(horizontal = 5.dp, vertical = 2.dp)
+                        ) {
+                            Text("P2P MESH", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = CyberPurple)
+                        }
+                    }
+                    if (task.activeMirror != null) {
+                        Text(
+                            text = "⚡ ${task.activeMirror}",
+                            fontSize = 9.sp,
+                            color = CyberGreen,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
 
             // Progress Bar / Chunk Visualizer
@@ -313,7 +399,7 @@ fun TaskCard(
                         TaskStatus.COMPLETED -> CyberGreen
                         TaskStatus.PAUSED -> CyberAmber
                         TaskStatus.ERROR -> CyberRed
-                        else -> CyberBlueLight
+                        else -> MaterialTheme.colorScheme.primary
                     },
                     trackColor = MaterialTheme.colorScheme.surface
                 )
@@ -351,7 +437,7 @@ fun TaskCard(
                                 text = Formatters.formatSpeed(task.speed),
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = CyberBlueLight
+                                color = MaterialTheme.colorScheme.primary
                             )
                             if (task.etaSeconds > 0) {
                                 Spacer(modifier = Modifier.width(4.dp))

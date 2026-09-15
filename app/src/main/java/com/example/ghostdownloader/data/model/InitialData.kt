@@ -57,6 +57,13 @@ object InitialData {
             sha256Hash = "a9b2c89f5643e21019d38cbf9012354a8b7fca29104bde978cf2340156ef9a82",
             mimeType = "application/x-iso9660-image",
             referer = "https://releases.ubuntu.com/24.04/",
+            smartTags = listOf("Software", "Linux OS", "x86_64"),
+            mirrorUrls = listOf(
+                "https://mirrors.edge.kernel.org/ubuntu-releases/24.04/ubuntu-24.04-desktop-amd64.iso",
+                "https://mirror.ox.ac.uk/sites/releases.ubuntu.com/24.04/ubuntu-24.04-desktop-amd64.iso",
+                "https://quantum-mirror.hu/mirrors/pub/ubuntu-releases/24.04/ubuntu-24.04-desktop-amd64.iso"
+            ),
+            activeMirror = "Cloudflare Global Edge CDN (24ms)",
             headers = mapOf(
                 "Accept-Ranges" to "bytes",
                 "Server" to "Apache/2.4.52 (Ubuntu)",
@@ -107,6 +114,8 @@ object InitialData {
             chunks = generateChunks(943718400L, 396361728L, 20),
             savePath = "/storage/emulated/0/Download/Ghost/Torrents/Big_Buck_Bunny_4K_60fps_Surround.mkv",
             mimeType = "video/x-matroska",
+            smartTags = listOf("Movies", "4K HDR", "Surround 5.1"),
+            hasSubtitles = true,
             trackers = listOf(
                 TorrentTracker("trk-1", "udp://tracker.opentrackr.org:1337/announce", "active", 19, 23, 4892L, "32s ago"),
                 TorrentTracker("trk-2", "udp://open.demonii.com:1337/announce", "active", 14, 18, 3201L, "1m ago"),
@@ -178,7 +187,64 @@ object InitialData {
             connections = 8,
             chunks = generateChunks(2021654528L, 852492288L, 16),
             savePath = "/storage/emulated/0/Download/Ghost/AI/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
-            mimeType = "application/octet-stream"
+            mimeType = "application/octet-stream",
+            smartTags = listOf("Software", "AI Model", "GGUF Quant")
+        ),
+        DownloadTask(
+            id = "task-7",
+            name = "Jujutsu_Kaisen_S02E23_1080p_DualAudio.mkv",
+            url = "https://cdn.anime-stream.org/downloads/s02/jjk_s02e23_1080p.mkv",
+            protocol = ProtocolType.HTTP,
+            category = CategoryType.VIDEO,
+            status = TaskStatus.DOWNLOADING,
+            priority = TaskPriority.HIGH,
+            totalBytes = 891289600L,
+            downloadedBytes = 642289600L,
+            speed = 14680064L,
+            uploadSpeed = 0L,
+            etaSeconds = 16L,
+            connections = 16,
+            chunks = generateChunks(891289600L, 642289600L, 16),
+            savePath = "/storage/emulated/0/Download/Ghost/Anime/Jujutsu_Kaisen_S02E23_1080p_DualAudio.mkv",
+            md5Hash = "d41d8cd98f00b204e9800998ecf8427e",
+            sha256Hash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            mimeType = "video/x-matroska",
+            smartTags = listOf("Anime", "1080p", "Dual Audio", "Hindi/Jap"),
+            hasSubtitles = true,
+            isMeshShared = true,
+            mirrorUrls = listOf(
+                "https://edge-tokyo.animecdn.org/jjk/ep23.mkv",
+                "https://edge-singapore.animecdn.org/jjk/ep23.mkv",
+                "https://mirror-eu.animecdn.org/jjk/ep23.mkv"
+            ),
+            activeMirror = "Fastly Tokyo Edge CDN (18ms)"
+        ),
+        DownloadTask(
+            id = "task-8",
+            name = "Deep_Learning_System_Architecture_Study_Notes.pdf",
+            url = "https://arxiv.org/pdf/cs.ai.2401.pdf",
+            protocol = ProtocolType.HTTP,
+            category = CategoryType.DOCUMENT,
+            status = TaskStatus.COMPLETED,
+            priority = TaskPriority.NORMAL,
+            totalBytes = 48234496L,
+            downloadedBytes = 48234496L,
+            speed = 0L,
+            uploadSpeed = 0L,
+            etaSeconds = 0L,
+            connections = 4,
+            chunks = generateChunks(48234496L, 48234496L, 4),
+            completedAt = System.currentTimeMillis() - 3600000L,
+            savePath = "/storage/emulated/0/Download/Ghost/Study/Deep_Learning_System_Architecture_Study_Notes.pdf",
+            md5Hash = "a1b2c3d4e5f67890123456789abcdef0",
+            sha256Hash = "f0e1d2c3b4a5968778695a4b3c2d1e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d",
+            mimeType = "application/pdf",
+            smartTags = listOf("Study Notes", "AI/ML", "University Notes", "PDF"),
+            mirrorUrls = listOf(
+                "https://arxiv.org/pdf/cs.ai.2401.pdf",
+                "https://openreview.net/pdf?id=deeplearning"
+            ),
+            activeMirror = "ArXiv Academic Cloud (32ms)"
         )
     )
 
@@ -272,6 +338,46 @@ object InitialData {
             description = "Connects to classic eD2k server directories and decentralized Kad DHT network.",
             protocols = listOf("ed2k"),
             features = listOf("Kad DHT", "ICH Checksum Recovery", "Server Met Auto-Update")
+        ),
+        FeaturePack(
+            id = "ai_parser_pack",
+            name = "AI Universal Video & Stream Parser",
+            identifier = "gd3.ai.videoparser",
+            version = "2.1.0",
+            enabled = true,
+            description = "Extracts 4K/1080p video streams, audio, and captions from Reels, Shorts, TikTok, and web players without watermarks.",
+            protocols = listOf("instagram", "tiktok", "youtube", "twitter", "reddit"),
+            features = listOf("Watermark Removal", "Lossless Audio Rip", "Auto Subtitles (.srt)", "Stream Signature Decoder")
+        ),
+        FeaturePack(
+            id = "bonding_pack",
+            name = "Multi-Network Dual-Channel Bonding",
+            identifier = "gd3.net.bonding",
+            version = "3.2.0",
+            enabled = true,
+            description = "Combines Wi-Fi 6 and 5G/LTE cellular pipelines simultaneously for maximum aggregated throughput.",
+            protocols = listOf("multipath-tcp", "bonding", "mesh-p2p"),
+            features = listOf("Wi-Fi + 5G Aggregation", "Dynamic Mirror Failover", "Thermal & Battery Guard", "Local LAN P2P Mesh")
+        ),
+        FeaturePack(
+            id = "cloud_debrid_pack",
+            name = "Cloud & Debrid High-Speed Engine",
+            identifier = "gd3.cloud.debrid",
+            version = "1.5.2",
+            enabled = true,
+            description = "Unrestricts premium hosters (Rapidgator, 1Fichier, Mega, Torrents) and auto-syncs completed files to Google Drive, WebDAV & Telegram.",
+            protocols = listOf("real-debrid", "alldebrid", "webdav", "gdrive"),
+            features = listOf("Debrid Link Unlock", "Auto Cloud Backup", "Auto-Free Local Space", "Telegram Bot Sync")
+        ),
+        FeaturePack(
+            id = "security_pack",
+            name = "VirusTotal 70+ Engines & EXIF Stripper",
+            identifier = "gd3.sec.antivirus",
+            version = "2.5.0",
+            enabled = true,
+            description = "Multi-engine sandbox heuristic scanner that verifies hashes and sanitizes GPS/camera metadata from media.",
+            protocols = listOf("virustotal", "sha256", "exif-clean"),
+            features = listOf("72 Antivirus Engines", "EXIF GPS Sanitizer", "APK Signature Audit", "Live Hash Matching")
         )
     )
 

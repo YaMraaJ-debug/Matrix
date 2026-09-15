@@ -1,5 +1,6 @@
 package com.example.ghostdownloader.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,18 +20,26 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Memory
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Radar
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Extension
 import androidx.compose.material.icons.outlined.Radar
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -39,6 +48,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -48,30 +58,38 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ghostdownloader.R
 import com.example.ghostdownloader.data.model.DownloadTask
 import com.example.ghostdownloader.data.model.TaskStatus
+import com.example.ghostdownloader.ui.components.FloatingSpeedBubbleWidget
+import com.example.ghostdownloader.ui.dialogs.AiVideoParserDialog
 import com.example.ghostdownloader.ui.dialogs.ArchiveExtractorDialog
 import com.example.ghostdownloader.ui.dialogs.BatchUrlDialog
+import com.example.ghostdownloader.ui.dialogs.CloudDebridDialog
 import com.example.ghostdownloader.ui.dialogs.GhostShareDialog
 import com.example.ghostdownloader.ui.dialogs.GhostVaultDialog
 import com.example.ghostdownloader.ui.dialogs.MediaPlayerModal
+import com.example.ghostdownloader.ui.dialogs.NetworkBondingDialog
 import com.example.ghostdownloader.ui.dialogs.NewTaskDialog
 import com.example.ghostdownloader.ui.dialogs.PlanTaskDialog
 import com.example.ghostdownloader.ui.dialogs.PlatformArchitectureDialog
 import com.example.ghostdownloader.ui.dialogs.RssFeedDialog
+import com.example.ghostdownloader.ui.dialogs.SecurityVirusScannerDialog
 import com.example.ghostdownloader.ui.dialogs.SiteDeepExtractorDialog
 import com.example.ghostdownloader.ui.dialogs.SpeedLimiterDialog
 import com.example.ghostdownloader.ui.dialogs.StealthProxyDialog
 import com.example.ghostdownloader.ui.dialogs.StorageCleanerDialog
 import com.example.ghostdownloader.ui.dialogs.TaskDetailsDialog
+import com.example.ghostdownloader.ui.dialogs.ThemeSelectorDialog
 import com.example.ghostdownloader.ui.screens.DownloadsScreen
 import com.example.ghostdownloader.ui.screens.FeaturePacksScreen
 import com.example.ghostdownloader.ui.screens.MediaSnifferScreen
@@ -109,10 +127,37 @@ fun GhostDownloaderApp(viewModel: MainViewModel) {
     var showSiteExtractorDialog by remember { mutableStateOf(false) }
     var showStealthProxyDialog by remember { mutableStateOf(false) }
     var showStorageCleanerDialog by remember { mutableStateOf(false) }
+    var showAiParserDialog by remember { mutableStateOf(false) }
+    var showBondingDialog by remember { mutableStateOf(false) }
+    var showCloudDebridDialog by remember { mutableStateOf(false) }
+    var activeSecurityScanTask by remember { mutableStateOf<DownloadTask?>(null) }
+    var bubbleVisible by remember { mutableStateOf(true) }
     var activeGhostShareTask by remember { mutableStateOf<DownloadTask?>(null) }
     var activeArchiveTask by remember { mutableStateOf<DownloadTask?>(null) }
     var activeMediaPlayerTarget by remember { mutableStateOf<Triple<String, String, Boolean>?>(null) }
     var selectedTaskForDetails by remember { mutableStateOf<DownloadTask?>(null) }
+    var showThemeSelectorDialog by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    var detectedClipboardLink by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(settings.clipboardAutoDetect) {
+        if (settings.clipboardAutoDetect) {
+            try {
+                val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as? android.content.ClipboardManager
+                clipboard?.primaryClip?.let { clip ->
+                    if (clip.itemCount > 0) {
+                        val text = clip.getItemAt(0)?.text?.toString()?.trim() ?: ""
+                        if ((text.startsWith("http://") || text.startsWith("https://") || text.startsWith("magnet:")) &&
+                            tasks.none { it.url == text }
+                        ) {
+                            detectedClipboardLink = text
+                        }
+                    }
+                }
+            } catch (_: Exception) {}
+        }
+    }
 
     val activeCount = remember(tasks) {
         tasks.count { it.status == TaskStatus.DOWNLOADING }
@@ -128,7 +173,7 @@ fun GhostDownloaderApp(viewModel: MainViewModel) {
                     ) {
                         Image(
                             painter = painterResource(id = R.drawable.ic_logo_nobg),
-                            contentDescription = "Ghost Downloader Logo",
+                            contentDescription = "Matrix-dlp Logo",
                             modifier = Modifier
                                 .size(32.dp)
                                 .clip(RoundedCornerShape(6.dp))
@@ -136,27 +181,30 @@ fun GhostDownloaderApp(viewModel: MainViewModel) {
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = "Ghost Downloader",
+                                    text = "Matrix-dlp",
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 17.sp
+                                    fontSize = 18.sp,
+                                    letterSpacing = 0.5.sp
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Box(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(4.dp))
-                                        .background(CyberBlue.copy(alpha = 0.2f))
+                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
                                         .padding(horizontal = 5.dp, vertical = 1.dp)
                                 ) {
                                     Text(
-                                        text = "v3.0",
-                                        fontSize = 10.sp,
+                                        text = "DLP-PRO",
+                                        fontSize = 9.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = CyberBlueLight
+                                        fontFamily = FontFamily.Monospace,
+                                        color = MaterialTheme.colorScheme.primary
                                     )
                                 }
                             }
                             Text(
-                                text = "High-Speed Multi-Protocol Engine",
+                                text = "Ultra-Fast Multi-Protocol Engine",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -164,12 +212,47 @@ fun GhostDownloaderApp(viewModel: MainViewModel) {
                     }
                 },
                 actions = {
+                    // Theme Studio button
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                            .clickable { showThemeSelectorDialog = true }
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Palette,
+                                contentDescription = "Theme Studio",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = when (settings.appTheme) {
+                                    "synthwave" -> "SYNTH"
+                                    "oled" -> "OLED"
+                                    "cyber_blue" -> "CYBER"
+                                    "clean_light" -> "LIGHT"
+                                    else -> "NEON"
+                                },
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Monospace,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(6.dp))
+
                     // Architecture / Platform badge button
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(12.dp))
-                            .background(CyberBlue.copy(alpha = 0.15f))
-                            .border(1.dp, CyberBlue.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f))
+                            .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
                             .clickable { showPlatformDialog = true }
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
@@ -177,23 +260,16 @@ fun GhostDownloaderApp(viewModel: MainViewModel) {
                             Icon(
                                 imageVector = Icons.Default.Memory,
                                 contentDescription = "Platform & Architecture",
-                                tint = CyberBlueLight,
+                                tint = MaterialTheme.colorScheme.secondary,
                                 modifier = Modifier.size(13.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = if (deviceProfile.is64Bit) "ARM64" else "ARMv7",
-                                fontSize = 11.sp,
+                                fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = FontFamily.Monospace,
-                                color = CyberBlueLight
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Box(
-                                modifier = Modifier
-                                    .size(5.dp)
-                                    .clip(CircleShape)
-                                    .background(CyberGreen)
+                                color = MaterialTheme.colorScheme.secondary
                             )
                         }
                     }
@@ -323,6 +399,10 @@ fun GhostDownloaderApp(viewModel: MainViewModel) {
                     },
                     onOpenSiteExtractor = { showSiteExtractorDialog = true },
                     onOpenStorageCleaner = { showStorageCleanerDialog = true },
+                    onOpenAiParser = { showAiParserDialog = true },
+                    onOpenBonding = { showBondingDialog = true },
+                    onOpenCloudDebrid = { showCloudDebridDialog = true },
+                    onScanSecurity = { task -> activeSecurityScanTask = task },
                     speedThrottlePreset = settings.speedThrottlePreset,
                     globalLimitKbps = settings.globalDownloadLimitKbps
                 )
@@ -339,7 +419,10 @@ fun GhostDownloaderApp(viewModel: MainViewModel) {
                 )
                 2 -> FeaturePacksScreen(
                     packs = packs,
-                    onTogglePack = { viewModel.toggleFeaturePack(it) }
+                    onTogglePack = { viewModel.toggleFeaturePack(it) },
+                    onOpenAiParser = { showAiParserDialog = true },
+                    onOpenBonding = { showBondingDialog = true },
+                    onOpenCloudDebrid = { showCloudDebridDialog = true }
                 )
                 3 -> SettingsScreen(
                     settings = settings,
@@ -347,6 +430,90 @@ fun GhostDownloaderApp(viewModel: MainViewModel) {
                     onOpenPlatformMatrix = { showPlatformDialog = true },
                     onOpenStealthProxy = { showStealthProxyDialog = true },
                     onOpenStorageCleaner = { showStorageCleanerDialog = true }
+                )
+            }
+
+            // Smart Clipboard Auto-Catch Overlay Banner
+            AnimatedVisibility(
+                visible = detectedClipboardLink != null,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                detectedClipboardLink?.let { clipUrl ->
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                        shape = RoundedCornerShape(12.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, CyberBlueLight),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.ContentPaste,
+                                contentDescription = null,
+                                tint = CyberBlueLight,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    "Link detected in Clipboard",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    clipUrl,
+                                    fontSize = 10.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Button(
+                                onClick = {
+                                    viewModel.addTask(url = clipUrl)
+                                    detectedClipboardLink = null
+                                },
+                                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = CyberBlueLight, contentColor = Color.Black)
+                            ) {
+                                Text("Download", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
+                            IconButton(
+                                onClick = { detectedClipboardLink = null },
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Icon(Icons.Default.Close, contentDescription = "Dismiss", modifier = Modifier.size(16.dp))
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Floating Speed Bubble Widget (Overlay Controller)
+            if (settings.floatingBubbleEnabled) {
+                FloatingSpeedBubbleWidget(
+                    isVisible = bubbleVisible,
+                    downloadSpeed = totalDownloadSpeed,
+                    uploadSpeed = totalUploadSpeed,
+                    activeTasksCount = activeCount,
+                    isPaused = activeCount == 0 && tasks.any { it.status == TaskStatus.PAUSED },
+                    onToggleGlobalPause = {
+                        if (activeCount > 0) {
+                            viewModel.pauseAllTasks()
+                        } else {
+                            viewModel.startAllTasks()
+                        }
+                    },
+                    onCloseBubble = { bubbleVisible = false },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(end = 16.dp, bottom = 16.dp)
                 )
             }
         }
@@ -411,7 +578,8 @@ fun GhostDownloaderApp(viewModel: MainViewModel) {
         if (showVaultDialog) {
             GhostVaultDialog(
                 vaultedTasks = vaultedTasks,
-                currentPin = settings.ghostVaultPin,
+                currentPin = settings.vaultPin,
+                decoyPin = settings.decoyVaultPin,
                 onDismiss = { showVaultDialog = false },
                 onUnlockTask = { id -> viewModel.setTaskVaulted(id, false) },
                 onDeleteTask = { id -> viewModel.deleteTask(id) },
@@ -524,7 +692,74 @@ fun GhostDownloaderApp(viewModel: MainViewModel) {
                 },
                 onOpenArchiveExtractor = {
                     activeArchiveTask = liveTask
+                },
+                onOpenPlayer = {
+                    activeMediaPlayerTarget = Triple(
+                        liveTask.name,
+                        liveTask.url,
+                        liveTask.category != com.example.ghostdownloader.data.model.CategoryType.MUSIC
+                    )
+                },
+                onOpenSecurityScanner = {
+                    activeSecurityScanTask = liveTask
                 }
+            )
+        }
+
+        if (showAiParserDialog) {
+            AiVideoParserDialog(
+                onDismiss = { showAiParserDialog = false },
+                onStartDownload = { url, title, isAudio ->
+                    viewModel.addDirectDownload(
+                        url = url,
+                        name = title,
+                        protocol = com.example.ghostdownloader.data.model.ProtocolType.HTTP_HTTPS,
+                        category = if (isAudio) com.example.ghostdownloader.data.model.CategoryType.MUSIC else com.example.ghostdownloader.data.model.CategoryType.VIDEO
+                    )
+                    showAiParserDialog = false
+                }
+            )
+        }
+
+        if (showBondingDialog) {
+            NetworkBondingDialog(
+                bondingEnabled = settings.dualChannelBondingEnabled,
+                onToggleBonding = { enabled ->
+                    viewModel.updateSettings(settings.copy(dualChannelBondingEnabled = enabled))
+                },
+                onDismiss = { showBondingDialog = false }
+            )
+        }
+
+        if (showCloudDebridDialog) {
+            CloudDebridDialog(
+                onDismiss = { showCloudDebridDialog = false },
+                onAddUnrestrictedTask = { unrestrictUrl, title ->
+                    viewModel.addDirectDownload(
+                        url = unrestrictUrl,
+                        name = title,
+                        protocol = com.example.ghostdownloader.data.model.ProtocolType.HTTP_HTTPS,
+                        category = com.example.ghostdownloader.data.model.CategoryType.ARCHIVE
+                    )
+                    showCloudDebridDialog = false
+                }
+            )
+        }
+
+        activeSecurityScanTask?.let { task ->
+            SecurityVirusScannerDialog(
+                task = task,
+                onDismiss = { activeSecurityScanTask = null }
+            )
+        }
+
+        if (showThemeSelectorDialog) {
+            ThemeSelectorDialog(
+                currentTheme = settings.appTheme,
+                onSelectTheme = { themeId ->
+                    viewModel.updateSettings(settings.copy(appTheme = themeId))
+                },
+                onDismiss = { showThemeSelectorDialog = false }
             )
         }
     }
